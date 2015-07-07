@@ -83,7 +83,7 @@ func main() {
 		}
 
 		// print out the result
-		fmt.Println(ws.Content.AsString("\n", "\t"))
+		fmt.Println(ws.Content.GetString("\n", "\t"))
 	}
 
 	app.Run(os.Args)
@@ -175,6 +175,6 @@ func ReadData(src string) (string, error) {
 	} else {
 		dataTmp = src
 	}
-	// remove linebreaks (error at javascript)
+	// remove linebreaks (sonst error im js)
 	return strings.Replace(dataTmp, "\n", "", -1), nil
 }
