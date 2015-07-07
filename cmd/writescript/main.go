@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/codegangsta/cli"
-	"github.com/paulvollmer/writescript"
+	"github.com/writescript/writescript"
 )
 
 // main cli tool
@@ -82,7 +82,6 @@ func main() {
 			os.Exit(1)
 		}
 
-		// print out the result
 		fmt.Println(ws.Content.GetString("\n", "\t"))
 	}
 
