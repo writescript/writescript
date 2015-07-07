@@ -1,2 +1,1 @@
-# writescript
-plugin based generator tool backpacked with data
+# writescript [![Build Status](https://travis-ci.org/writescript/writescript.svg?branch=master)](https://travis-ci.org/writescript/writescript)
