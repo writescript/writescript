@@ -4,19 +4,16 @@ import (
 	"testing"
 )
 
-// initialize an instance we can test
-var ws = WriteScript{}
-
 //
 // test empty plugin and data string
 //
 func TestGeneratorEmpty(t *testing.T) {
+	var ws = WriteScript{}
 	err := ws.Process("", "", "", false)
 	if err != nil {
 		t.Error("failed", err)
 	}
-	println(ws.Content.AsString("\n", "\t"))
-	if ws.Content.AsString("\n", "\t") != "" {
+	if ws.Content.GetString("\n", "\t") != "" {
 		t.Error("result not correct")
 	}
 }
@@ -25,11 +22,12 @@ func TestGeneratorEmpty(t *testing.T) {
 // test simple plugin
 //
 func TestGeneratorPlugin(t *testing.T) {
+	var ws = WriteScript{}
 	err := ws.Process("writeln('hello')", "", "", false)
 	if err != nil {
 		t.Error("failed", err)
 	}
-	if ws.Content.AsString("\n", "\t") != "hello\n" {
+	if ws.Content.GetString("\n", "\t") != "hello\n" {
 		t.Error("result not correct")
 	}
 }
@@ -38,11 +36,12 @@ func TestGeneratorPlugin(t *testing.T) {
 // test simple plugin with empty data object
 //
 func TestGeneratorPluginData(t *testing.T) {
+	var ws = WriteScript{}
 	err := ws.Process("writeln('hello')", "{}", "", false)
 	if err != nil {
 		t.Error("failed", err)
 	}
-	if ws.Content.AsString("\n", "\t") != "hello\n" {
+	if ws.Content.GetString("\t", "\n") != "hello\n" {
 		t.Error("result not correct")
 	}
 }
@@ -51,8 +50,14 @@ func TestGeneratorPluginData(t *testing.T) {
 // test broken plugin
 //
 func TestGeneratorPluginBroken(t *testing.T) {
+	var ws = WriteScript{}
 	err := ws.Process("writeln('hello'", "", "", false)
 	if err == nil {
 		t.Error("failed, no error was detected")
 	}
 }
+
+// func TestGeneratorWrite(t *testing.T) {
+// 	_ = generator.Process(`write('foo')`, "")
+// 	fmt.Println(generator.Content.GetString("\n", "\t"))
+// }
