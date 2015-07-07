@@ -2,8 +2,8 @@ package writescript
 
 import (
 	"fmt"
-	"github.com/paulvollmer/otto"
-	"github.com/paulvollmer/textbackend"
+	"github.com/writescript/otto"
+	"github.com/writescript/textbackend"
 )
 
 // Version of the script engine.
@@ -31,7 +31,7 @@ func (w *WriteScript) Process(plugin, data, header string, headerOn bool) error 
 	// initialize otto
 	vm := otto.New()
 	// infos about the software
-	vm.Set("VERSION", Version)
+	vm.Set("version", Version)
 	// create api we can use at the plugin
 	vm.Set("writeln", func(call otto.FunctionCall) otto.Value {
 		// check if args are empty...
@@ -39,13 +39,11 @@ func (w *WriteScript) Process(plugin, data, header string, headerOn bool) error 
 			w.Content.Writeln("")
 		} else {
 			tmpLine := ""
-			for l, v := range call.ArgumentList {
-				// val, _ := call.Argument(0).ToString()
+			for _, v := range call.ArgumentList {
 				val, errVal := v.ToString()
 				if errVal != nil {
 					fmt.Println("cannot convert variable", errVal)
 				}
-				fmt.Println(">>", l, val)
 				tmpLine += val
 
 			}
@@ -70,8 +68,6 @@ func (w *WriteScript) Process(plugin, data, header string, headerOn bool) error 
 
 // CreateVMScript creates the javascript script core wrapper.
 func CreateVMScript(plugin, data string) string {
-	//fmt.Println("CreateVMScript")
-
 	script := `
 	function RUN(data) {
 		` + plugin + `
@@ -83,7 +79,5 @@ func CreateVMScript(plugin, data string) string {
 		script += `JSON.parse('` + data + `')`
 	}
 	script += `);`
-	// fmt.Println("SCRIPT:", script)
-
 	return script
 }
