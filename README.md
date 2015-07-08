@@ -1,4 +1,4 @@
-# writescript [![Build Status](https://travis-ci.org/writescript/writescript.svg?branch=master)](https://travis-ci.org/writescript/writescript)
+# writescript [![Build Status](https://travis-ci.org/writescript/writescript.svg?branch=master)](https://travis-ci.org/writescript/writescript) [![GoDoc](https://godoc.org/github.com/writescript/writescript?status.svg)](https://godoc.org/github.com/writescript/writescript)
 
 plugin based generator tool backpacked with data
 
