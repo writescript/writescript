@@ -43,6 +43,16 @@ func main() {
 			Value: "",
 			Usage: "the data as file or json string",
 		},
+		cli.StringFlag{
+			Name:  "linebreak, l",
+			Value: "\\n",
+			Usage: "the linebreak for each row",
+		},
+		cli.StringFlag{
+			Name:  "whitespace, w",
+			Value: "\t",
+			Usage: "the level whitespace",
+		},
 		cli.BoolFlag{
 			Name:  "header-off, H",
 			Usage: "disable header output",
@@ -58,6 +68,8 @@ func main() {
 		//
 		flagPlugin := c.String("plugin")
 		flagData := c.String("data")
+		flagLinebreak := c.String("linebreak")
+		flagWhitespace := c.String("whitespace")
 		flagHeaderOff := c.Bool("header-off")
 
 		// read plugin
@@ -82,7 +94,10 @@ func main() {
 			os.Exit(1)
 		}
 
-		fmt.Println(ws.Content.GetString("\n", "\t"))
+		if flagLinebreak == "\\n" {
+			flagLinebreak = "\n"
+		}
+		fmt.Println(ws.Content.GetString(flagLinebreak, flagWhitespace))
 	}
 
 	app.Run(os.Args)
