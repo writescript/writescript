@@ -41,7 +41,7 @@ func TestGeneratorPluginData(t *testing.T) {
 	if err != nil {
 		t.Error("failed", err)
 	}
-	if ws.Content.GetString("\t", "\n") != "hello\n" {
+	if ws.Content.GetString("\n", "\t") != "hello\n" {
 		t.Error("result not correct")
 	}
 }
