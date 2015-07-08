@@ -57,6 +57,29 @@ func (w *WriteScript) Process(plugin, data, header string, headerOn bool) error 
 	// 	g.Content.AddLine(ContentLine{g.level, val})
 	// 	return otto.Value{}
 	// })
+	vm.Set("pushLevel", func(call otto.FunctionCall) otto.Value {
+		w.Content.PushLevel()
+		return otto.Value{}
+	})
+
+	vm.Set("popLevel", func(call otto.FunctionCall) otto.Value {
+		w.Content.PopLevel()
+		return otto.Value{}
+	})
+
+	vm.Set("getLevel", func(call otto.FunctionCall) otto.Value {
+		val := w.Content.GetLevel()
+		result, _ := otto.ToValue(val)
+		return result
+	})
+
+	vm.Set("setLevel", func(call otto.FunctionCall) otto.Value {
+		val, err := call.Argument(0).ToInteger()
+		if err != nil {
+			w.Content.SetLevel(int(val))
+		}
+		return otto.Value{}
+	})
 
 	// run the vm and get the result
 	_, err := vm.Run(CreateVMScript(plugin, data))
