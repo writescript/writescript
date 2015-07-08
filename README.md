@@ -10,5 +10,8 @@ plugin based generator tool backpacked with data
 
     writescript -p theplugin.js -d mydata.json
 
+## Status
+The project is in alpha stage. Do not use in production!
+
 ## License
 This code is published under an MIT license. See LICENSE file for more information.
