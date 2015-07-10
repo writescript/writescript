@@ -90,7 +90,7 @@ func main() {
 		ws := writescript.WriteScript{}
 		err = ws.Process(string(pluginBytes), dataBytes, "", !flagHeaderOff)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("writescript plugin error!\n", err)
 			os.Exit(1)
 		}
 
