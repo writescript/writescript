@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/writescript/otto"
 	"github.com/writescript/textbackend"
+	"strings"
 )
 
 // Version of the script engine.
@@ -16,6 +17,10 @@ type WriteScript struct {
 
 // Process the plugin generator.
 func (w *WriteScript) Process(plugin, data, header string, headerOn bool) error {
+	// Plugin load and import stuff...
+	tmpPlugin := Plugin{}
+	tmpPlugin.Init(plugin)
+
 	// do you want to write a header?
 	if headerOn {
 		if header == "" {
@@ -31,8 +36,10 @@ func (w *WriteScript) Process(plugin, data, header string, headerOn bool) error 
 
 	// initialize otto
 	vm := otto.New()
+
 	// infos about the software
 	vm.Set("version", Version)
+
 	// create api we can use at the plugin
 	vm.Set("writeln", func(call otto.FunctionCall) otto.Value {
 		// check if args are empty...
@@ -46,18 +53,27 @@ func (w *WriteScript) Process(plugin, data, header string, headerOn bool) error 
 					fmt.Println("cannot convert variable", errVal)
 				}
 				tmpLine += val
-
 			}
-
 			w.Content.Writeln(tmpLine)
 		}
-
 		return otto.Value{}
 	})
-	// vm.Set("TODO: write", func(call otto.FunctionCall) otto.Value {
-	// 	g.Content.AddLine(ContentLine{g.level, val})
-	// 	return otto.Value{}
-	// })
+
+	vm.Set("write", func(call otto.FunctionCall) otto.Value {
+		if len(call.ArgumentList) != 0 {
+			tmpLine := ""
+			for _, v := range call.ArgumentList {
+				val, errVal := v.ToString()
+				if errVal != nil {
+					fmt.Println("cannot convert variable", errVal)
+				}
+				tmpLine += val
+			}
+			w.Content.Write(tmpLine)
+		}
+		return otto.Value{}
+	})
+
 	vm.Set("pushLevel", func(call otto.FunctionCall) otto.Value {
 		w.Content.PushLevel()
 		return otto.Value{}
@@ -83,7 +99,13 @@ func (w *WriteScript) Process(plugin, data, header string, headerOn bool) error 
 	})
 
 	// run the vm and get the result
-	_, err := vm.Run(CreateVMScript(plugin, data))
+	tmpScripts := strings.Join(tmpPlugin.ImportCodeStack, "\n") + strings.Join(tmpPlugin.Js, "\n")
+	vmScript := CreateVMScript(tmpScripts, data)
+	// fmt.Println("vmScript")
+	// fmt.Println("====================================")
+	// fmt.Println(vmScript)
+	// fmt.Println("====================================")
+	_, err := vm.Run(vmScript)
 	if err != nil {
 		return err
 	}
@@ -92,8 +114,7 @@ func (w *WriteScript) Process(plugin, data, header string, headerOn bool) error 
 
 // CreateVMScript creates the javascript script core wrapper.
 func CreateVMScript(plugin, data string) string {
-	script := `
-	function RUN(data) {
+	script := `function RUN(data) {
 		` + plugin + `
 	};`
 	script += `RUN(`
