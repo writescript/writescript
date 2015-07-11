@@ -55,7 +55,7 @@ func main() {
 		},
 		cli.BoolFlag{
 			Name:  "header-off, H",
-			Usage: "disable header output",
+			Usage: "disables header output",
 		},
 	}
 
@@ -88,7 +88,7 @@ func main() {
 
 		// run the generator
 		ws := writescript.WriteScript{}
-		err = ws.Process(string(pluginBytes), dataBytes, "", !flagHeaderOff)
+		err = ws.Process(string(pluginBytes), dataBytes, !flagHeaderOff)
 		if err != nil {
 			fmt.Println("writescript plugin error!\n", err)
 			os.Exit(1)

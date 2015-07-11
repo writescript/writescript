@@ -16,22 +16,17 @@ type WriteScript struct {
 }
 
 // Process the plugin generator.
-func (w *WriteScript) Process(plugin, data, header string, headerOn bool) error {
+func (w *WriteScript) Process(plugin, data string, headerOn bool) error {
 	// Plugin load and import stuff...
 	tmpPlugin := Plugin{}
 	tmpPlugin.Init(plugin)
 
-	// do you want to write a header?
+	// do you want to write the default header?
 	if headerOn {
-		if header == "" {
-			// if no header was set, create a default header
-			w.Content.Writeln("// written by writescript v" + Version)
-			w.Content.Writeln("// DO NOT EDIT!")
-			w.Content.Writeln("")
-		} else {
-			// set the header to the first line
-			w.Content.Writeln(header)
-		}
+		// if no header was set, create a default header
+		w.Content.Writeln("// written by writescript v" + Version)
+		w.Content.Writeln("// DO NOT EDIT!")
+		w.Content.Writeln("")
 	}
 
 	// initialize otto
