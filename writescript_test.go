@@ -78,9 +78,8 @@ func TestWritescript_getLevel(t *testing.T) {
 
 // func TestWritescript_setLevel(t *testing.T) {
 // 	var ws = WriteScript{}
-// 	err := ws.Process("setLevel(3);writeln('hello');", "", "", false)
-// 	println(ws.Content.GetString("\n", "-"))
-// 	t.Log(ws.Content)
+// 	err := ws.Process("setLevel(3);writeln('hello');", "", false)
+// 	fmt.Println(ws.Content.GetString("\n", "-"))
 // 	if err != nil || ws.Content.GetString("\n", "-") != "---hello\n" {
 // 		t.Error("setLevel failed", err)
 // 	}
