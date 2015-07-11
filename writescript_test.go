@@ -76,14 +76,13 @@ func TestWritescript_getLevel(t *testing.T) {
 	}
 }
 
-// func TestWritescript_setLevel(t *testing.T) {
-// 	var ws = WriteScript{}
-// 	err := ws.Process("setLevel(3);writeln('hello');", "", false)
-// 	fmt.Println(ws.Content.GetString("\n", "-"))
-// 	if err != nil || ws.Content.GetString("\n", "-") != "---hello\n" {
-// 		t.Error("setLevel failed", err)
-// 	}
-// }
+func TestWritescript_setLevel(t *testing.T) {
+	var ws = WriteScript{}
+	err := ws.Process("writeln('hello');setLevel(3);writeln('world');", "", false)
+	if ws.Content.GetString("\n", "-") != "hello\n---world\n" {
+		t.Error("setLevel failed", err)
+	}
+}
 
 func TestWritescript_PluginAndEmptyDataObject(t *testing.T) {
 	var ws = WriteScript{}

@@ -87,7 +87,7 @@ func (w *WriteScript) Process(plugin, data string, headerOn bool) error {
 
 	vm.Set("setLevel", func(call otto.FunctionCall) otto.Value {
 		val, err := call.Argument(0).ToInteger()
-		if err != nil {
+		if err == nil {
 			w.Content.SetLevel(int(val))
 		}
 		return otto.Value{}
