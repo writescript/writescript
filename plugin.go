@@ -49,7 +49,7 @@ func ParseSource(src string) ([]string, []string, []string) {
 				// fmt.Println("check if url exists at array... '" + tmpUrl[1] + "'")
 
 				// Is url already Known?
-				if !isValueInList(tmpUrl[1], tmpImportURLs) {
+				if !IsValueInList(tmpUrl[1], tmpImportURLs) {
 					// fmt.Println("ADD NEW URL...")
 					tmpImportURLs = append(tmpImportURLs, tmpUrl[1])
 					data := Request(tmpUrl[1])
@@ -65,7 +65,7 @@ func ParseSource(src string) ([]string, []string, []string) {
 	return tmpImportURLs, tmpImportCodeStack, tmpJavascript
 }
 
-func isValueInList(value string, list []string) bool {
+func IsValueInList(value string, list []string) bool {
 	for _, v := range list {
 		if v == value {
 			return true
