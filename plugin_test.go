@@ -7,22 +7,22 @@ import (
 	"testing"
 )
 
-func TestPlugin_isValueInList(t *testing.T) {
+func TestPlugin_IsValueInList(t *testing.T) {
 	tmp1 := IsValueInList("test", []string{"data", "to"})
 	if tmp1 != false {
-		t.Error("isValueInList failed")
+		t.Error("IsValueInList failed")
 	}
 
 	tmp2 := IsValueInList("test", []string{"data", "to", "test"})
 	if tmp2 != true {
-		t.Error("isValueInList failed")
+		t.Error("IsValueInList failed")
 	}
 }
 
 func TestPlugin_ParseSource_Simple(t *testing.T) {
-	urls, pluginStack, js := ParseSource(`console.log('hello test')`)
-	if len(urls) != 0 || len(pluginStack) != 0 || len(js) != 1 {
-		t.Error("Error at ParseSource")
+	urls, pluginStack, js, err := ParseSource(`console.log('hello test')`)
+	if err != nil || len(urls) != 0 || len(pluginStack) != 0 || len(js) != 1 {
+		t.Error("ParseSource failed")
 	}
 }
 
@@ -33,10 +33,10 @@ func TestPlugin_ParseSource_OneImport(t *testing.T) {
 	}))
 	defer server.Close()
 
-	urls, pluginStack, js := ParseSource(`#import ` + server.URL + `
+	urls, pluginStack, js, err := ParseSource(`#import ` + server.URL + `
 console.log('hello test')`)
-	if len(urls) != 1 || len(pluginStack) != 1 || len(js) != 1 {
-		t.Error("Error at ParseSource")
+	if err != nil || len(urls) != 1 || len(pluginStack) != 1 || len(js) != 1 {
+		t.Error("ParseSource failed")
 	}
 }
 
@@ -47,18 +47,18 @@ func TestPlugin_ParseSource_MultipleImports(t *testing.T) {
 	}))
 	defer server.Close()
 
-	urls, pluginStack, js := ParseSource(`#import ` + server.URL + `/test1
+	urls, pluginStack, js, err := ParseSource(`#import ` + server.URL + `/test1
 #import ` + server.URL + `/test2
 console.log('hello test')`)
-	if len(urls) != 2 || len(pluginStack) != 2 || len(js) != 1 {
-		t.Error("Error at ParseSource")
+	if err != nil || len(urls) != 2 || len(pluginStack) != 2 || len(js) != 1 {
+		t.Error("ParseSource failed")
 	}
 }
 
-// func TestPlugin_ParseSource(t *testing.T) {
-// 	plugin := Plugin{}
-// 	plugin.Init("")
-// 	if len(plugin.ImportURLs) != 0 || len(plugin.ImportCodeStack) != 0 || len(plugin.Js) != 0 {
-// 		t.Error("Error at empty plugin initialisation")
-// 	}
-// }
+func TestPlugin_ParseSource_ImportRequestFailed(t *testing.T) {
+	_, _, _, err := ParseSource(`#import http://wrong.url
+console.log('hello test')`)
+	if err == nil {
+		t.Error("ParseSource failed")
+	}
+}

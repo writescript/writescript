@@ -1,10 +1,8 @@
 package writescript
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strings"
 )
 
@@ -18,14 +16,15 @@ type Plugin struct {
 	Js              []string // here we store the main plugin code
 }
 
-func (p *Plugin) Init(src string) {
-	p.ImportURLs, p.ImportCodeStack, p.Js = ParseSource(src)
+func (p *Plugin) Init(src string) (err error) {
+	p.ImportURLs, p.ImportCodeStack, p.Js, err = ParseSource(src)
 	// fmt.Println("ImportURLs", p.ImportURLs)
 	// fmt.Println("ImportCodeStack", p.ImportCodeStack)
 	// fmt.Println("js", strings.Join(p.Js, "\n"))
+	return err
 }
 
-func ParseSource(src string) ([]string, []string, []string) {
+func ParseSource(src string) ([]string, []string, []string, error) {
 	tmpImportURLs := []string{}
 	tmpImportCodeStack := []string{}
 	tmpJavascript := []string{}
@@ -38,31 +37,20 @@ func ParseSource(src string) ([]string, []string, []string) {
 			// get the url...
 			tmpUrl := strings.Split(v, KEYWORD_IMPORT)
 
-			// check if import already exists
-			if len(tmpImportURLs) == 0 {
-				// 	fmt.Println("FIRST PLUGIN IMPORT", importUrl)
+			// check if import already exists, or is not at the list of known urls
+			if len(tmpImportURLs) == 0 || !IsValueInList(tmpUrl[1], tmpImportURLs) {
 				tmpImportURLs = append(tmpImportURLs, tmpUrl[1])
-				data := Request(tmpUrl[1])
-				// fmt.Println("DATA", string(data))
-				tmpImportCodeStack = append(tmpImportCodeStack, string(data))
-			} else {
-				// fmt.Println("check if url exists at array... '" + tmpUrl[1] + "'")
-
-				// Is url already Known?
-				if !IsValueInList(tmpUrl[1], tmpImportURLs) {
-					// fmt.Println("ADD NEW URL...")
-					tmpImportURLs = append(tmpImportURLs, tmpUrl[1])
-					data := Request(tmpUrl[1])
-					tmpImportCodeStack = append(tmpImportCodeStack, string(data))
+				data, err := Request(tmpUrl[1])
+				if err != nil {
+					return tmpImportURLs, tmpImportCodeStack, tmpJavascript, err
 				}
+				tmpImportCodeStack = append(tmpImportCodeStack, string(data))
 			}
-
 		} else {
 			tmpJavascript = append(tmpJavascript, v)
 		}
 	}
-
-	return tmpImportURLs, tmpImportCodeStack, tmpJavascript
+	return tmpImportURLs, tmpImportCodeStack, tmpJavascript, nil
 }
 
 func IsValueInList(value string, list []string) bool {
@@ -74,18 +62,15 @@ func IsValueInList(value string, list []string) bool {
 	return false
 }
 
-func Request(url string) []byte {
+func Request(url string) ([]byte, error) {
 	resp, errReq := http.Get(url)
 	if errReq != nil {
-		fmt.Println("cannot import source", url)
-		os.Exit(1)
+		return []byte{}, errReq
 	}
 	defer resp.Body.Close()
 	body, errBody := ioutil.ReadAll(resp.Body)
 	if errBody != nil {
-		fmt.Println("require read body failed", errBody)
-		os.Exit(2)
+		return []byte{}, errBody
 	}
-	// fmt.Println("file", string(body))
-	return body
+	return body, nil
 }
