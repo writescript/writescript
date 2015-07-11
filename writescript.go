@@ -2,7 +2,7 @@ package writescript
 
 import (
 	"fmt"
-	"github.com/writescript/otto"
+	"github.com/robertkrimen/otto"
 	"github.com/writescript/textbackend"
 	"strings"
 )
