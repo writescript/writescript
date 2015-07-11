@@ -2,8 +2,9 @@ package writescript
 
 import (
 	"fmt"
-	"github.com/writescript/otto"
+	"github.com/robertkrimen/otto"
 	"github.com/writescript/textbackend"
+	"strings"
 )
 
 // Version of the script engine.
@@ -15,23 +16,25 @@ type WriteScript struct {
 }
 
 // Process the plugin generator.
-func (w *WriteScript) Process(plugin, data, header string, headerOn bool) error {
-	// do you want to write a header?
+func (w *WriteScript) Process(plugin, data string, headerOn bool) error {
+	// Plugin load and import stuff...
+	tmpPlugin := Plugin{}
+	tmpPlugin.Init(plugin)
+
+	// do you want to write the default header?
 	if headerOn {
-		if header == "" {
-			// if no header was set, create a default header
-			w.Content.Writeln("// written by writescript v" + Version)
-			w.Content.Writeln("// DO NOT EDIT!")
-		} else {
-			// set the header to the first line
-			w.Content.Writeln(header)
-		}
+		// if no header was set, create a default header
+		w.Content.Writeln("// written by writescript v" + Version)
+		w.Content.Writeln("// DO NOT EDIT!")
+		w.Content.Writeln("")
 	}
 
 	// initialize otto
 	vm := otto.New()
+
 	// infos about the software
 	vm.Set("version", Version)
+
 	// create api we can use at the plugin
 	vm.Set("writeln", func(call otto.FunctionCall) otto.Value {
 		// check if args are empty...
@@ -45,21 +48,59 @@ func (w *WriteScript) Process(plugin, data, header string, headerOn bool) error 
 					fmt.Println("cannot convert variable", errVal)
 				}
 				tmpLine += val
-
 			}
-
 			w.Content.Writeln(tmpLine)
 		}
-
 		return otto.Value{}
 	})
-	// vm.Set("TODO: write", func(call otto.FunctionCall) otto.Value {
-	// 	g.Content.AddLine(ContentLine{g.level, val})
-	// 	return otto.Value{}
-	// })
+
+	vm.Set("write", func(call otto.FunctionCall) otto.Value {
+		if len(call.ArgumentList) != 0 {
+			tmpLine := ""
+			for _, v := range call.ArgumentList {
+				val, errVal := v.ToString()
+				if errVal != nil {
+					fmt.Println("cannot convert variable", errVal)
+				}
+				tmpLine += val
+			}
+			w.Content.Write(tmpLine)
+		}
+		return otto.Value{}
+	})
+
+	vm.Set("pushLevel", func(call otto.FunctionCall) otto.Value {
+		w.Content.PushLevel()
+		return otto.Value{}
+	})
+
+	vm.Set("popLevel", func(call otto.FunctionCall) otto.Value {
+		w.Content.PopLevel()
+		return otto.Value{}
+	})
+
+	vm.Set("getLevel", func(call otto.FunctionCall) otto.Value {
+		val := w.Content.GetLevel()
+		result, _ := otto.ToValue(val)
+		return result
+	})
+
+	vm.Set("setLevel", func(call otto.FunctionCall) otto.Value {
+		val, err := call.Argument(0).ToInteger()
+		if err == nil {
+			w.Content.SetLevel(int(val))
+		}
+		return otto.Value{}
+	})
 
 	// run the vm and get the result
-	_, err := vm.Run(CreateVMScript(plugin, data))
+	tmpScripts := strings.Join(tmpPlugin.ImportCodeStack, "\n") + strings.Join(tmpPlugin.Js, "\n")
+	vmScript := CreateVMScript(tmpScripts, data)
+	// fmt.Println("vmScript")
+	// fmt.Println("====================================")
+	// fmt.Println(vmScript)
+	// fmt.Println("====================================")
+	_, err := vm.Run(vmScript)
 	if err != nil {
 		return err
 	}
@@ -68,8 +109,7 @@ func (w *WriteScript) Process(plugin, data, header string, headerOn bool) error 
 
 // CreateVMScript creates the javascript script core wrapper.
 func CreateVMScript(plugin, data string) string {
-	script := `
-	function RUN(data) {
+	script := `function RUN(data) {
 		` + plugin + `
 	};`
 	script += `RUN(`

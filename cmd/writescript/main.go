@@ -43,9 +43,19 @@ func main() {
 			Value: "",
 			Usage: "the data as file or json string",
 		},
+		cli.StringFlag{
+			Name:  "linebreak, l",
+			Value: "\\n",
+			Usage: "the linebreak for each row",
+		},
+		cli.StringFlag{
+			Name:  "whitespace, w",
+			Value: "\t",
+			Usage: "the level whitespace",
+		},
 		cli.BoolFlag{
 			Name:  "header-off, H",
-			Usage: "disable header output",
+			Usage: "disables header output",
 		},
 	}
 
@@ -58,6 +68,8 @@ func main() {
 		//
 		flagPlugin := c.String("plugin")
 		flagData := c.String("data")
+		flagLinebreak := c.String("linebreak")
+		flagWhitespace := c.String("whitespace")
 		flagHeaderOff := c.Bool("header-off")
 
 		// read plugin
@@ -76,13 +88,16 @@ func main() {
 
 		// run the generator
 		ws := writescript.WriteScript{}
-		err = ws.Process(string(pluginBytes), dataBytes, "", !flagHeaderOff)
+		err = ws.Process(string(pluginBytes), dataBytes, !flagHeaderOff)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("writescript plugin error!\n", err)
 			os.Exit(1)
 		}
 
-		fmt.Println(ws.Content.GetString("\n", "\t"))
+		if flagLinebreak == "\\n" {
+			flagLinebreak = "\n"
+		}
+		fmt.Println(ws.Content.GetString(flagLinebreak, flagWhitespace))
 	}
 
 	app.Run(os.Args)
