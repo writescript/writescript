@@ -22,6 +22,7 @@ func (w *WriteScript) Process(plugin, data, header string, headerOn bool) error 
 			// if no header was set, create a default header
 			w.Content.Writeln("// written by writescript v" + Version)
 			w.Content.Writeln("// DO NOT EDIT!")
+			w.Content.Writeln("")
 		} else {
 			// set the header to the first line
 			w.Content.Writeln(header)
