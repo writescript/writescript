@@ -7,44 +7,48 @@ import (
 	"testing"
 )
 
-func TestPlugin_PluginParseSource_Simple(t *testing.T) {
-	urls, pluginStack, js, err := PluginParseSource(`console.log('hello test')`)
-	if err != nil || len(urls) != 0 || len(pluginStack) != 0 || len(js) != 1 {
+func TestPlugin_ParseSource_Simple(t *testing.T) {
+	plugin := Plugin{}
+	err := plugin.ParseSource(`console.log('hello test')`)
+	if err != nil || len(plugin.ImportURLs) != 0 || len(plugin.ImportCodeStack) != 0 || len(plugin.Js) != 1 {
 		t.Error("ParseSource failed")
 	}
 }
 
-func TestPlugin_PluginParseSource_OneImport(t *testing.T) {
+func TestPlugin_ParseSource_OneImport(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/javascript")
 		io.WriteString(w, "var foo = 'test'")
 	}))
 	defer server.Close()
 
-	urls, pluginStack, js, err := PluginParseSource(`#import ` + server.URL + `
+	plugin := Plugin{}
+	err := plugin.ParseSource(`#import ` + server.URL + `
 console.log('hello test')`)
-	if err != nil || len(urls) != 1 || len(pluginStack) != 1 || len(js) != 1 {
+	if err != nil || len(plugin.ImportURLs) != 1 || len(plugin.ImportCodeStack) != 1 || len(plugin.Js) != 1 {
 		t.Error("ParseSource failed")
 	}
 }
 
-func TestPlugin_PluginParseSource_MultipleImports(t *testing.T) {
+func TestPlugin_ParseSource_MultipleImports(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/javascript")
 		io.WriteString(w, "var foo = 'test'")
 	}))
 	defer server.Close()
 
-	urls, pluginStack, js, err := PluginParseSource(`#import ` + server.URL + `/test1
+	plugin := Plugin{}
+	err := plugin.ParseSource(`#import ` + server.URL + `/test1
 #import ` + server.URL + `/test2
 console.log('hello test')`)
-	if err != nil || len(urls) != 2 || len(pluginStack) != 2 || len(js) != 1 {
+	if err != nil || len(plugin.ImportURLs) != 2 || len(plugin.ImportCodeStack) != 2 || len(plugin.Js) != 1 {
 		t.Error("ParseSource failed")
 	}
 }
 
-func TestPlugin_PluginParseSource_ImportRequestFailed(t *testing.T) {
-	_, _, _, err := PluginParseSource(`#import http://wrong.url
+func TestPlugin_ParseSource_ImportRequestFailed(t *testing.T) {
+	plugin := Plugin{}
+	err := plugin.ParseSource(`#import http://wrong.url
 console.log('hello test')`)
 	if err == nil {
 		t.Error("ParseSource failed")

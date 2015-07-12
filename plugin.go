@@ -16,19 +16,15 @@ type Plugin struct {
 	Js              []string // here we store the main plugin code
 }
 
-func (p *Plugin) Init(src string) (err error) {
-	p.ImportURLs, p.ImportCodeStack, p.Js, err = PluginParseSource(src)
-	// fmt.Println("ImportURLs", p.ImportURLs)
-	// fmt.Println("ImportCodeStack", p.ImportCodeStack)
-	// fmt.Println("js", strings.Join(p.Js, "\n"))
-	return err
-}
+// func (p *Plugin) Init(src string) error {
+// 	err := p.ParseSource(src)
+// 	// fmt.Println("ImportURLs", p.ImportURLs)
+// 	// fmt.Println("ImportCodeStack", p.ImportCodeStack)
+// 	// fmt.Println("js", strings.Join(p.Js, "\n"))
+// 	return err
+// }
 
-func PluginParseSource(src string) ([]string, []string, []string, error) {
-	tmpImportURLs := []string{}
-	tmpImportCodeStack := []string{}
-	tmpJavascript := []string{}
-
+func (p *Plugin) ParseSource(src string) error {
 	pluginLines := strings.Split(src, "\n")
 	for _, v := range pluginLines {
 		// fmt.Println("k", k, "v", v)
@@ -38,22 +34,22 @@ func PluginParseSource(src string) ([]string, []string, []string, error) {
 			tmpUrl := strings.Split(v, KEYWORD_IMPORT)
 
 			// check if import already exists, or is not at the list of known urls
-			if len(tmpImportURLs) == 0 || !IsValueInList(tmpUrl[1], tmpImportURLs) {
-				tmpImportURLs = append(tmpImportURLs, tmpUrl[1])
-				data, err := PluginRequest(tmpUrl[1])
+			if len(p.ImportURLs) == 0 || !IsValueInList(tmpUrl[1], p.ImportURLs) {
+				p.ImportURLs = append(p.ImportURLs, tmpUrl[1])
+				data, err := p.request(tmpUrl[1])
 				if err != nil {
-					return tmpImportURLs, tmpImportCodeStack, tmpJavascript, err
+					return err
 				}
-				tmpImportCodeStack = append(tmpImportCodeStack, string(data))
+				p.ImportCodeStack = append(p.ImportCodeStack, string(data))
 			}
 		} else {
-			tmpJavascript = append(tmpJavascript, v)
+			p.Js = append(p.Js, v)
 		}
 	}
-	return tmpImportURLs, tmpImportCodeStack, tmpJavascript, nil
+	return nil
 }
 
-func PluginRequest(url string) ([]byte, error) {
+func (p *Plugin) request(url string) ([]byte, error) {
 	resp, errReq := http.Get(url)
 	if errReq != nil {
 		return []byte{}, errReq

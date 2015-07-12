@@ -19,7 +19,7 @@ type WriteScript struct {
 func (w *WriteScript) Process(plugin, data string, headerOn bool) error {
 	// Plugin load and import stuff...
 	tmpPlugin := Plugin{}
-	tmpPlugin.Init(plugin)
+	tmpPlugin.ParseSource(plugin)
 
 	// do you want to write the default header?
 	if headerOn {
