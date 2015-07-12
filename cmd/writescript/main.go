@@ -40,7 +40,7 @@ func main() {
 		cli.StringFlag{
 			Name:  "data, d",
 			Value: "",
-			Usage: "the data as file or json string",
+			Usage: "the data formatted as json or yaml, as file or string",
 		},
 		// settings
 		cli.StringFlag{
@@ -104,13 +104,10 @@ func main() {
 }
 
 const (
-	SourceTypeUnknown    = 0
-	SourceTypeString     = 1
-	SourceTypeJavascript = 2
-	SourceTypeJSON       = 3
-	SourceTypeURL        = 4
-	ExtensionJavascript  = ".js"
-	ExtensionJSON        = ".json"
+	SourceTypeUnknown = iota
+	SourceTypeString
+	SourceTypeJavascript
+	SourceTypeURL
 )
 
 func SourceIsType(src string) int {
@@ -121,10 +118,8 @@ func SourceIsType(src string) int {
 
 	if urlErr == nil && tmpURL.Scheme == "http" || tmpURL.Scheme == "https" {
 		theType = SourceTypeURL
-	} else if tmpExt == ExtensionJavascript {
+	} else if tmpExt == ".js" {
 		theType = SourceTypeJavascript
-	} else if tmpExt == ExtensionJSON {
-		theType = SourceTypeJSON
 	} else if src != "" {
 		theType = SourceTypeString
 	}
@@ -149,10 +144,6 @@ func ReadPlugin(src string) ([]byte, error) {
 		break
 	case SourceTypeJavascript:
 		dataReturn, err = ioutil.ReadFile(src)
-		break
-	case SourceTypeJSON:
-		dataReturn = []byte("")
-		err = errors.New("JSON as Plugin not supported")
 		break
 	case SourceTypeURL:
 		resp, errReq := http.Get(src)
