@@ -7,18 +7,6 @@ import (
 	"testing"
 )
 
-func TestPlugin_PluginIsValueInList(t *testing.T) {
-	tmp1 := PluginIsValueInList("test", []string{"data", "to"})
-	if tmp1 != false {
-		t.Error("IsValueInList failed")
-	}
-
-	tmp2 := PluginIsValueInList("test", []string{"data", "to", "test"})
-	if tmp2 != true {
-		t.Error("IsValueInList failed")
-	}
-}
-
 func TestPlugin_PluginParseSource_Simple(t *testing.T) {
 	urls, pluginStack, js, err := PluginParseSource(`console.log('hello test')`)
 	if err != nil || len(urls) != 0 || len(pluginStack) != 0 || len(js) != 1 {
