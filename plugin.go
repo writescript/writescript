@@ -17,14 +17,14 @@ type Plugin struct {
 }
 
 func (p *Plugin) Init(src string) (err error) {
-	p.ImportURLs, p.ImportCodeStack, p.Js, err = ParseSource(src)
+	p.ImportURLs, p.ImportCodeStack, p.Js, err = PluginParseSource(src)
 	// fmt.Println("ImportURLs", p.ImportURLs)
 	// fmt.Println("ImportCodeStack", p.ImportCodeStack)
 	// fmt.Println("js", strings.Join(p.Js, "\n"))
 	return err
 }
 
-func ParseSource(src string) ([]string, []string, []string, error) {
+func PluginParseSource(src string) ([]string, []string, []string, error) {
 	tmpImportURLs := []string{}
 	tmpImportCodeStack := []string{}
 	tmpJavascript := []string{}
@@ -38,9 +38,9 @@ func ParseSource(src string) ([]string, []string, []string, error) {
 			tmpUrl := strings.Split(v, KEYWORD_IMPORT)
 
 			// check if import already exists, or is not at the list of known urls
-			if len(tmpImportURLs) == 0 || !IsValueInList(tmpUrl[1], tmpImportURLs) {
+			if len(tmpImportURLs) == 0 || !PluginIsValueInList(tmpUrl[1], tmpImportURLs) {
 				tmpImportURLs = append(tmpImportURLs, tmpUrl[1])
-				data, err := Request(tmpUrl[1])
+				data, err := PluginRequest(tmpUrl[1])
 				if err != nil {
 					return tmpImportURLs, tmpImportCodeStack, tmpJavascript, err
 				}
@@ -53,7 +53,7 @@ func ParseSource(src string) ([]string, []string, []string, error) {
 	return tmpImportURLs, tmpImportCodeStack, tmpJavascript, nil
 }
 
-func IsValueInList(value string, list []string) bool {
+func PluginIsValueInList(value string, list []string) bool {
 	for _, v := range list {
 		if v == value {
 			return true
@@ -62,7 +62,7 @@ func IsValueInList(value string, list []string) bool {
 	return false
 }
 
-func Request(url string) ([]byte, error) {
+func PluginRequest(url string) ([]byte, error) {
 	resp, errReq := http.Get(url)
 	if errReq != nil {
 		return []byte{}, errReq
