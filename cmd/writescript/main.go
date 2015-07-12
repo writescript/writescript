@@ -1,16 +1,10 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"net/url"
-	"os"
-	"path/filepath"
-
 	"github.com/codegangsta/cli"
 	"github.com/writescript/writescript"
+	"os"
 )
 
 // main cli tool
@@ -73,7 +67,7 @@ func main() {
 		flagHeaderOff := c.Bool("header-off")
 
 		// read plugin
-		pluginBytes, err := ReadPlugin(flagPlugin)
+		pluginBytes, err := writescript.LoadPlugin(flagPlugin)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -101,63 +95,4 @@ func main() {
 	}
 
 	app.Run(os.Args)
-}
-
-const (
-	SourceTypeUnknown = iota
-	SourceTypeString
-	SourceTypeJavascript
-	SourceTypeURL
-)
-
-func SourceIsType(src string) int {
-	theType := SourceTypeUnknown
-
-	tmpExt := filepath.Ext(src)
-	tmpURL, urlErr := url.Parse(src)
-
-	if urlErr == nil && tmpURL.Scheme == "http" || tmpURL.Scheme == "https" {
-		theType = SourceTypeURL
-	} else if tmpExt == ".js" {
-		theType = SourceTypeJavascript
-	} else if src != "" {
-		theType = SourceTypeString
-	}
-
-	return theType
-}
-
-//
-// ReadPlugin and return as byte array
-//
-func ReadPlugin(src string) ([]byte, error) {
-	var err error
-	var dataReturn []byte
-
-	switch SourceIsType(src) {
-	case SourceTypeUnknown:
-		dataReturn = []byte("")
-		err = errors.New("No Plugin was set")
-		break
-	case SourceTypeString:
-		dataReturn = []byte(src)
-		break
-	case SourceTypeJavascript:
-		dataReturn, err = ioutil.ReadFile(src)
-		break
-	case SourceTypeURL:
-		resp, errReq := http.Get(src)
-		if errReq != nil {
-			err = errReq
-		}
-		defer resp.Body.Close()
-		body, errBody := ioutil.ReadAll(resp.Body)
-		if errBody != nil {
-			err = errBody
-		}
-		dataReturn = body
-		break
-	}
-
-	return dataReturn, err
 }

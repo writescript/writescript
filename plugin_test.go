@@ -54,3 +54,56 @@ console.log('hello test')`)
 		t.Error("ParseSource failed")
 	}
 }
+
+func Test_PluginIsType_Unknown(t *testing.T) {
+	if PluginIsType("") != PluginTypeUnknown {
+		t.Error("Source type is not unknown")
+	}
+}
+
+func Test_PluginIsType_File(t *testing.T) {
+	if PluginIsType("test.js") != PluginTypeFile {
+		t.Error("Source type is not javascript")
+	}
+}
+
+func Test_PluginIsType_Url(t *testing.T) {
+	if PluginIsType("http://test.js") != PluginTypeURL {
+		t.Error("Source type is not an url")
+	}
+}
+
+func Test_PluginIsType_String(t *testing.T) {
+	if PluginIsType("test string") != PluginTypeString {
+		t.Error("Source type is not a string")
+	}
+}
+
+//
+// test LoadPlugin function
+//
+func Test_LoadPlugin_Empty(t *testing.T) {
+	result1, err := LoadPlugin("")
+	if string(result1) != "" && err == nil {
+		t.Error("returned plugin is not empty message", err)
+	}
+}
+
+func Test_LoadPlugin_File(t *testing.T) {
+	result2, err := LoadPlugin("./fixture/testplugin.js")
+	if string(result2) != "console.log('hello world')\n" {
+		t.Error("returned plugin is incorrect", err)
+	}
+}
+
+func Test_LoadPlugin_Url(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/javascript")
+		io.WriteString(w, "ok...")
+	}))
+	defer server.Close()
+	result3, err := LoadPlugin(server.URL)
+	if string(result3) != "ok..." {
+		t.Error("returned plugin is incorrect", err)
+	}
+}

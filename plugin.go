@@ -1,8 +1,11 @@
 package writescript
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"path/filepath"
 	"strings"
 )
 
@@ -15,14 +18,6 @@ type Plugin struct {
 	ImportCodeStack []string
 	Js              []string // here we store the main plugin code
 }
-
-// func (p *Plugin) Init(src string) error {
-// 	err := p.ParseSource(src)
-// 	// fmt.Println("ImportURLs", p.ImportURLs)
-// 	// fmt.Println("ImportCodeStack", p.ImportCodeStack)
-// 	// fmt.Println("js", strings.Join(p.Js, "\n"))
-// 	return err
-// }
 
 func (p *Plugin) ParseSource(src string) error {
 	pluginLines := strings.Split(src, "\n")
@@ -60,4 +55,82 @@ func (p *Plugin) request(url string) ([]byte, error) {
 		return []byte{}, errBody
 	}
 	return body, nil
+}
+
+// LoadPlugin and return the source as a byte array
+func LoadPlugin(src string) ([]byte, error) {
+	var err error
+	var dataReturn []byte
+
+	switch PluginIsType(src) {
+
+	case PluginTypeUnknown:
+		dataReturn = []byte("")
+		err = errors.New("No Plugin was set")
+		break
+
+	case PluginTypeFile:
+		dataReturn, err = ioutil.ReadFile(src)
+		break
+
+	case PluginTypeURL:
+		resp, errReq := http.Get(src)
+		if errReq != nil {
+			err = errReq
+		}
+		defer resp.Body.Close()
+		body, errBody := ioutil.ReadAll(resp.Body)
+		if errBody != nil {
+			err = errBody
+		}
+		dataReturn = body
+		break
+
+	case PluginTypeString:
+		dataReturn = []byte(src)
+		break
+	}
+
+	// TODO: check if plugin keyword exists (in registry)
+	// XXX: library of default plugins
+	// fmt.Println("search if plugin is embedded...")
+	// switch src {
+	// case "golang-const":
+	// 	// println("...golang-const")
+	// 	dataReturn = PLUGIN_GOLANG_CONST
+	// 	break
+	// case "golang-cli":
+	// 	// println("...golang-cli")
+	// 	dataReturn = PLUGIN_GOLANG_CLI
+	// 	break
+	// default:
+	// println("... default")
+	// }
+
+	// fmt.Println("==> pluginBytes:", string(pluginBytes))
+	return dataReturn, err
+}
+
+const (
+	PluginTypeUnknown = iota
+	PluginTypeFile
+	PluginTypeURL
+	PluginTypeString
+)
+
+func PluginIsType(src string) int {
+	theType := PluginTypeUnknown
+
+	tmpExt := filepath.Ext(src)
+	tmpURL, urlErr := url.Parse(src)
+
+	if urlErr == nil && tmpURL.Scheme == "http" || tmpURL.Scheme == "https" {
+		theType = PluginTypeURL
+	} else if tmpExt == ".js" {
+		theType = PluginTypeFile
+	} else if src != "" {
+		theType = PluginTypeString
+	}
+
+	return theType
 }
