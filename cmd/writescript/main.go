@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/codegangsta/cli"
 	"github.com/writescript/writescript"
