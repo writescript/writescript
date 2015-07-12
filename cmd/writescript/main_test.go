@@ -1,7 +1,11 @@
 package main
 
 import (
+	"os"
 	"testing"
 )
 
-func TestMain(m *testing.M) { os.Exit(m.Run()) }
+func TestMain(m *testing.M) {
+	exitCode := m.Run()
+	os.Exit(exitCode)
+}
