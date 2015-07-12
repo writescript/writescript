@@ -193,6 +193,5 @@ func ReadData(src string) (string, error) {
 	} else {
 		dataTmp = src
 	}
-	// remove linebreaks (sonst error im js)
-	return strings.Replace(dataTmp, "\n", "", -1), nil
+	return dataTmp, nil
 }

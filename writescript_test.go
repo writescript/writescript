@@ -15,7 +15,7 @@ func TestWritescript_Empty(t *testing.T) {
 func TestWritescript_HeaderOn(t *testing.T) {
 	var ws = WriteScript{}
 	err := ws.Process("", "", true)
-	if err != nil || ws.Content.GetString("\n", "\t") != "// written by writescript v0.2.2\n// DO NOT EDIT!\n\n" {
+	if err != nil || ws.Content.GetString("\n", "\t") != "// written by writescript v0.2.3\n// DO NOT EDIT!\n\n" {
 		t.Error("header on failed", err)
 	}
 }

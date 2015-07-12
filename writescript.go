@@ -8,7 +8,7 @@ import (
 )
 
 // Version of the script engine.
-const Version = "0.2.2"
+const Version = "0.2.3"
 
 // WriteScript Core
 type WriteScript struct {
@@ -109,16 +109,19 @@ func (w *WriteScript) Process(plugin, data string, headerOn bool) error {
 	return nil
 }
 
-// CreateVMScript creates the javascript script core wrapper.
-func CreateVMScript(plugin, data string) string {
+// CreateVMScript creates the javascript script we run at the otto vm.
+// data must be formatted as json.
+func CreateVMScript(plugin, dataJSON string) string {
 	script := `function RUN(data) {
 		` + plugin + `
 	};`
 	script += `RUN(`
-	if data == "" {
+	if dataJSON == "" {
 		script += `{}` // if data is empty string, set it to an empty object
 	} else {
-		script += `JSON.parse('` + data + `')`
+		// remove linebreaks (or error at JSON.parse call)
+		dataWithoutLinebreak := strings.Replace(dataJSON, "\n", "", -1)
+		script += `JSON.parse('` + dataWithoutLinebreak + `')`
 	}
 	script += `);`
 	return script
