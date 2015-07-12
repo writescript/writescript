@@ -23,7 +23,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "writescript"
 	app.Version = writescript.Version
-	app.Usage = "writescript pulgin based source generator"
+	app.Usage = "plugin based generator tool backpacked with data"
 	app.Author = "Paul Vollmer"
 	app.Email = "paul.vollmer@fh-potsdam.de"
 
