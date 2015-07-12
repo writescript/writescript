@@ -80,15 +80,12 @@ func main() {
 		}
 
 		// read data
-		dataBytes, err := ReadData(flagData)
-		if err != nil {
-			fmt.Println("//", err)
-			fmt.Println("// try to run...")
-		}
+		data := Data{}
+		data.Init(flagData)
 
 		// run the generator
 		ws := writescript.WriteScript{}
-		err = ws.Process(string(pluginBytes), dataBytes, !flagHeaderOff)
+		err = ws.Process(string(pluginBytes), data.JSON, !flagHeaderOff)
 		if err != nil {
 			fmt.Println("writescript plugin error!\n", err)
 			os.Exit(1)
@@ -172,25 +169,4 @@ func ReadPlugin(src string) ([]byte, error) {
 	}
 
 	return dataReturn, err
-}
-
-//
-// ReadData and return as string. (this must be formatted as json)
-//
-func ReadData(src string) (string, error) {
-	if src == "" {
-		return "{}", nil
-	}
-	dataTmp := ""
-	// check if data-flag is a .json file or data as string
-	if filepath.Ext(src) == ".json" {
-		dataBytes, err := ioutil.ReadFile(src)
-		if err != nil {
-			return "", err
-		}
-		dataTmp = string(dataBytes)
-	} else {
-		dataTmp = src
-	}
-	return dataTmp, nil
 }

@@ -72,28 +72,3 @@ func TestReadPluginUrl(t *testing.T) {
 		t.Error("returned plugin is incorrect", err)
 	}
 }
-
-//
-// test ReadData function
-//
-func TestReadData(t *testing.T) {
-	result1, err := ReadData("")
-	if result1 != "{}" {
-		t.Error("returned data string is not empty object", err)
-	}
-
-	result2, err := ReadData("{}")
-	if result2 != "{}" {
-		t.Error("returned data string is not {}", err)
-	}
-
-	result3, err := ReadData("../../fixture/testdata.json")
-	if result3 != `{  "name": "testdata",  "description": "some data for testing"}` {
-		t.Error("returned data string incorrect", err)
-	}
-
-	_, err = ReadData("not-exist.json")
-	if err == nil {
-		t.Error("no error returned", err)
-	}
-}
