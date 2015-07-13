@@ -107,3 +107,10 @@ func Test_LoadPlugin_Url(t *testing.T) {
 		t.Error("returned plugin is incorrect", err)
 	}
 }
+
+func Test_LoadPlugin_StringSource(t *testing.T) {
+	result, err := LoadPlugin("var foo = 1337;")
+	if string(result) != "var foo = 1337;" {
+		t.Error("returned plugin source incorrect", err)
+	}
+}
