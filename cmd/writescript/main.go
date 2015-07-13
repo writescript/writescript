@@ -7,9 +7,22 @@ import (
 	"os"
 )
 
+const (
+	ENV_KEY_PLUGIN = "WRITESCRIPT_PLUGIN"
+	ENV_KEY_DATA   = "WRITESCRIPT_DATA"
+)
+
+var (
+	EnvPlugin string
+	EnvData   string
+)
+
 // main cli tool
 func main() {
 
+	// check env var
+	EnvPlugin = os.Getenv(ENV_KEY_PLUGIN)
+	EnvData = os.Getenv(ENV_KEY_DATA)
 	//
 	// meta
 	//
@@ -63,8 +76,10 @@ func main() {
 			Action: func(c *cli.Context) {
 				println("writescript env")
 				println("----------------------------")
-				println("  the working directory...")
-				println("  TODO: $WRITESCRIPT_PATH")
+				println("the plugin directory...")
+				println("  $" + ENV_KEY_PLUGIN + " = " + EnvPlugin)
+				println("the data directory...")
+				println("  $" + ENV_KEY_DATA + " = " + EnvData)
 			},
 		},
 	}
