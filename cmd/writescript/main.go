@@ -54,6 +54,22 @@ func main() {
 	}
 
 	//
+	// commands
+	//
+	app.Commands = []cli.Command{
+		{
+			Name:  "env",
+			Usage: "the writescript working directory info",
+			Action: func(c *cli.Context) {
+				println("writescript env")
+				println("----------------------------")
+				println("  the working directory...")
+				println("  TODO: $WRITESCRIPT_PATH")
+			},
+		},
+	}
+
+	//
 	// process
 	//
 	app.Action = func(c *cli.Context) {
