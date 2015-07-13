@@ -1,9 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"gopkg.in/yaml.v2"
+	"github.com/peter-edge/go-yaml2json"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -89,21 +88,14 @@ func (d *Data) ReadYaml(path string) {
 	if err != nil {
 		fmt.Println("cannot read yaml file", path)
 		fmt.Println(err)
-		os.Exit(1)
+		os.Exit(20)
 	}
+
 	// format yaml to json
-	var t map[string]interface{}
-	err = yaml.Unmarshal(yamlBytes, &t)
-	if err != nil {
-		fmt.Println("parse yaml file failed", err)
-		os.Exit(2)
+	tmpJson, errY2J := yaml2json.Transform(yamlBytes, yaml2json.TransformOptions{Pretty: false})
+	if errY2J != nil {
+		fmt.Println("decode yaml failed", errY2J)
+		os.Exit(21)
 	}
-
-	// fmt.Printf("T %#v\n", t)
-	j, err := json.Marshal(t)
-	if err != nil {
-		fmt.Println("error", err)
-	}
-
-	d.JSON = string(j)
+	d.JSON = string(tmpJson)
 }
