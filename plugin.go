@@ -31,7 +31,7 @@ func (p *Plugin) ParseSource(src string) error {
 			// check if import already exists, or is not at the list of known urls
 			if len(p.ImportURLs) == 0 || !IsValueInList(tmpUrl[1], p.ImportURLs) {
 				p.ImportURLs = append(p.ImportURLs, tmpUrl[1])
-				data, err := p.request(tmpUrl[1])
+				data, err := RequestPlugin(tmpUrl[1])
 				if err != nil {
 					return err
 				}
@@ -44,7 +44,7 @@ func (p *Plugin) ParseSource(src string) error {
 	return nil
 }
 
-func (p *Plugin) request(url string) ([]byte, error) {
+func RequestPlugin(url string) ([]byte, error) {
 	resp, errReq := http.Get(url)
 	if errReq != nil {
 		return []byte{}, errReq
@@ -74,38 +74,13 @@ func LoadPlugin(src string) ([]byte, error) {
 		break
 
 	case PluginTypeURL:
-		resp, errReq := http.Get(src)
-		if errReq != nil {
-			err = errReq
-		}
-		defer resp.Body.Close()
-		body, errBody := ioutil.ReadAll(resp.Body)
-		if errBody != nil {
-			err = errBody
-		}
-		dataReturn = body
+		dataReturn, err = RequestPlugin(src)
 		break
 
 	case PluginTypeString:
 		dataReturn = []byte(src)
 		break
 	}
-
-	// TODO: check if plugin keyword exists (in registry)
-	// XXX: library of default plugins
-	// fmt.Println("search if plugin is embedded...")
-	// switch src {
-	// case "golang-const":
-	// 	// println("...golang-const")
-	// 	dataReturn = PLUGIN_GOLANG_CONST
-	// 	break
-	// case "golang-cli":
-	// 	// println("...golang-cli")
-	// 	dataReturn = PLUGIN_GOLANG_CLI
-	// 	break
-	// default:
-	// println("... default")
-	// }
 
 	// fmt.Println("==> pluginBytes:", string(pluginBytes))
 	return dataReturn, err
