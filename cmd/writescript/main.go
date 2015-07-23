@@ -1,17 +1,10 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"net/url"
-	"os"
-	"path/filepath"
-	"strings"
-
 	"github.com/codegangsta/cli"
 	"github.com/writescript/writescript"
+	"os"
 )
 
 // main cli tool
@@ -41,7 +34,7 @@ func main() {
 		cli.StringFlag{
 			Name:  "data, d",
 			Value: "",
-			Usage: "the data as file or json string",
+			Usage: "the data formatted as json or yaml, as file or string",
 		},
 		// settings
 		cli.StringFlag{
@@ -74,22 +67,19 @@ func main() {
 		flagHeaderOff := c.Bool("header-off")
 
 		// read plugin
-		pluginBytes, err := ReadPlugin(flagPlugin)
+		pluginBytes, err := writescript.LoadPlugin(flagPlugin)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
 		// read data
-		dataBytes, err := ReadData(flagData)
-		if err != nil {
-			fmt.Println("//", err)
-			fmt.Println("// try to run...")
-		}
+		data := Data{}
+		data.Init(flagData)
 
 		// run the generator
 		ws := writescript.WriteScript{}
-		err = ws.Process(string(pluginBytes), dataBytes, !flagHeaderOff)
+		err = ws.Process(string(pluginBytes), data.JSON, !flagHeaderOff)
 		if err != nil {
 			fmt.Println("writescript plugin error!\n", err)
 			os.Exit(1)
@@ -105,94 +95,4 @@ func main() {
 	}
 
 	app.Run(os.Args)
-}
-
-const (
-	SourceTypeUnknown    = 0
-	SourceTypeString     = 1
-	SourceTypeJavascript = 2
-	SourceTypeJSON       = 3
-	SourceTypeURL        = 4
-	ExtensionJavascript  = ".js"
-	ExtensionJSON        = ".json"
-)
-
-func SourceIsType(src string) int {
-	theType := SourceTypeUnknown
-
-	tmpExt := filepath.Ext(src)
-	tmpURL, urlErr := url.Parse(src)
-
-	if urlErr == nil && tmpURL.Scheme == "http" || tmpURL.Scheme == "https" {
-		theType = SourceTypeURL
-	} else if tmpExt == ExtensionJavascript {
-		theType = SourceTypeJavascript
-	} else if tmpExt == ExtensionJSON {
-		theType = SourceTypeJSON
-	} else if src != "" {
-		theType = SourceTypeString
-	}
-
-	return theType
-}
-
-//
-// ReadPlugin and return as byte array
-//
-func ReadPlugin(src string) ([]byte, error) {
-	var err error
-	var dataReturn []byte
-
-	switch SourceIsType(src) {
-	case SourceTypeUnknown:
-		dataReturn = []byte("")
-		err = errors.New("No Plugin was set")
-		break
-	case SourceTypeString:
-		dataReturn = []byte(src)
-		break
-	case SourceTypeJavascript:
-		dataReturn, err = ioutil.ReadFile(src)
-		break
-	case SourceTypeJSON:
-		dataReturn = []byte("")
-		err = errors.New("JSON as Plugin not supported")
-		break
-	case SourceTypeURL:
-		resp, errReq := http.Get(src)
-		if errReq != nil {
-			err = errReq
-		}
-		defer resp.Body.Close()
-		body, errBody := ioutil.ReadAll(resp.Body)
-		if errBody != nil {
-			err = errBody
-		}
-		dataReturn = body
-		break
-	}
-
-	return dataReturn, err
-}
-
-//
-// ReadData and return as string. (this must be formatted as json)
-//
-func ReadData(src string) (string, error) {
-	if src == "" {
-		return "{}", nil
-	}
-	dataTmp := ""
-	// check if data-flag is a .json file or data as string
-	if filepath.Ext(src) == ".json" {
-		dataBytes, err := ioutil.ReadFile(src)
-		if err != nil {
-			return "", err
-		}
-		dataTmp = string(dataBytes)
-	} else {
-		dataTmp = src
-	}
-	// remove linebreaks (sonst error im js)
-	return strings.Replace(dataTmp, "\n", "", -1), nil
 }

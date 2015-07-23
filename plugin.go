@@ -1,8 +1,11 @@
 package writescript
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"path/filepath"
 	"strings"
 )
 
@@ -16,19 +19,7 @@ type Plugin struct {
 	Js              []string // here we store the main plugin code
 }
 
-func (p *Plugin) Init(src string) (err error) {
-	p.ImportURLs, p.ImportCodeStack, p.Js, err = PluginParseSource(src)
-	// fmt.Println("ImportURLs", p.ImportURLs)
-	// fmt.Println("ImportCodeStack", p.ImportCodeStack)
-	// fmt.Println("js", strings.Join(p.Js, "\n"))
-	return err
-}
-
-func PluginParseSource(src string) ([]string, []string, []string, error) {
-	tmpImportURLs := []string{}
-	tmpImportCodeStack := []string{}
-	tmpJavascript := []string{}
-
+func (p *Plugin) ParseSource(src string) error {
 	pluginLines := strings.Split(src, "\n")
 	for _, v := range pluginLines {
 		// fmt.Println("k", k, "v", v)
@@ -38,31 +29,22 @@ func PluginParseSource(src string) ([]string, []string, []string, error) {
 			tmpUrl := strings.Split(v, KEYWORD_IMPORT)
 
 			// check if import already exists, or is not at the list of known urls
-			if len(tmpImportURLs) == 0 || !PluginIsValueInList(tmpUrl[1], tmpImportURLs) {
-				tmpImportURLs = append(tmpImportURLs, tmpUrl[1])
-				data, err := PluginRequest(tmpUrl[1])
+			if len(p.ImportURLs) == 0 || !IsValueInList(tmpUrl[1], p.ImportURLs) {
+				p.ImportURLs = append(p.ImportURLs, tmpUrl[1])
+				data, err := RequestPlugin(tmpUrl[1])
 				if err != nil {
-					return tmpImportURLs, tmpImportCodeStack, tmpJavascript, err
+					return err
 				}
-				tmpImportCodeStack = append(tmpImportCodeStack, string(data))
+				p.ImportCodeStack = append(p.ImportCodeStack, string(data))
 			}
 		} else {
-			tmpJavascript = append(tmpJavascript, v)
+			p.Js = append(p.Js, v)
 		}
 	}
-	return tmpImportURLs, tmpImportCodeStack, tmpJavascript, nil
+	return nil
 }
 
-func PluginIsValueInList(value string, list []string) bool {
-	for _, v := range list {
-		if v == value {
-			return true
-		}
-	}
-	return false
-}
-
-func PluginRequest(url string) ([]byte, error) {
+func RequestPlugin(url string) ([]byte, error) {
 	resp, errReq := http.Get(url)
 	if errReq != nil {
 		return []byte{}, errReq
@@ -73,4 +55,57 @@ func PluginRequest(url string) ([]byte, error) {
 		return []byte{}, errBody
 	}
 	return body, nil
+}
+
+// LoadPlugin and return the source as a byte array
+func LoadPlugin(src string) ([]byte, error) {
+	var err error
+	var dataReturn []byte
+
+	switch PluginIsType(src) {
+
+	case PluginTypeUnknown:
+		dataReturn = []byte("")
+		err = errors.New("No Plugin was set")
+		break
+
+	case PluginTypeFile:
+		dataReturn, err = ioutil.ReadFile(src)
+		break
+
+	case PluginTypeURL:
+		dataReturn, err = RequestPlugin(src)
+		break
+
+	case PluginTypeString:
+		dataReturn = []byte(src)
+		break
+	}
+
+	// fmt.Println("==> pluginBytes:", string(pluginBytes))
+	return dataReturn, err
+}
+
+const (
+	PluginTypeUnknown = iota
+	PluginTypeFile
+	PluginTypeURL
+	PluginTypeString
+)
+
+func PluginIsType(src string) int {
+	theType := PluginTypeUnknown
+
+	tmpExt := filepath.Ext(src)
+	tmpURL, urlErr := url.Parse(src)
+
+	if urlErr == nil && tmpURL.Scheme == "http" || tmpURL.Scheme == "https" {
+		theType = PluginTypeURL
+	} else if tmpExt == ".js" {
+		theType = PluginTypeFile
+	} else if src != "" {
+		theType = PluginTypeString
+	}
+
+	return theType
 }
