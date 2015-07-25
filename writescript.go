@@ -8,7 +8,7 @@ import (
 )
 
 // Version of the script engine.
-const Version = "0.2.3"
+const Version = "0.3.0"
 
 // WriteScript Core
 type WriteScript struct {
