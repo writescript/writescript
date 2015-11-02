@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/peter-edge/go-yaml2json"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"go.pedge.io/pkg/yaml"
 )
 
 // Data initialize the data source for the writescript process.
@@ -92,7 +93,7 @@ func (d *Data) ReadYaml(path string) {
 	}
 
 	// format yaml to json
-	tmpJson, errY2J := yaml2json.Transform(yamlBytes, yaml2json.TransformOptions{Pretty: false})
+	tmpJson, errY2J := pkgyaml.ToJSON(yamlBytes, pkgyaml.ToJSONOptions{})
 	if errY2J != nil {
 		fmt.Println("decode yaml failed", errY2J)
 		os.Exit(21)
