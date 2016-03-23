@@ -4,7 +4,7 @@ plugin based generator tool backpacked with data
 
 ## Installation
 
-    go get github.com/writescript/writescript ...
+    go get github.com/writescript/writescript/cmd/writescript
 
 ## Usage
 
