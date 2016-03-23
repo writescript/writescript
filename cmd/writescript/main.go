@@ -5,6 +5,7 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/writescript/writescript"
 	"os"
+	"io/ioutil"
 )
 
 // main cli tool
@@ -24,17 +25,22 @@ func main() {
 	// flags
 	//
 	app.Flags = []cli.Flag{
-		// javascript code
+		// input
 		cli.StringFlag{
 			Name:  "plugin, p",
 			Value: "",
 			Usage: "the generator plugin as file",
 		},
-		// json data
 		cli.StringFlag{
 			Name:  "data, d",
 			Value: "",
 			Usage: "the data formatted as json or yaml, as file or string",
+		},
+		// output
+		cli.StringFlag{
+			Name:  "output, o",
+			Value: "",
+			Usage: "the output filepath",
 		},
 		// settings
 		cli.StringFlag{
@@ -62,6 +68,7 @@ func main() {
 		//
 		flagPlugin := c.String("plugin")
 		flagData := c.String("data")
+		flagOutput := c.String("output")
 		flagLinebreak := c.String("linebreak")
 		flagWhitespace := c.String("whitespace")
 		flagHeaderOff := c.Bool("header-off")
@@ -91,7 +98,14 @@ func main() {
 		if flagWhitespace == "\\t" {
 			flagWhitespace = "\t"
 		}
-		fmt.Println(ws.Content.GetString(flagLinebreak, flagWhitespace))
+
+		// write output
+		if flagOutput == "" {
+			fmt.Println(ws.Content.GetString(flagLinebreak, flagWhitespace))
+		} else {
+			fileBytes := []byte(ws.Content.GetString(flagLinebreak, flagWhitespace))
+			ioutil.WriteFile(flagOutput, fileBytes, 0644)
+		}
 	}
 
 	app.Run(os.Args)

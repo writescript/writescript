@@ -2,7 +2,7 @@ language: go
 
 go:
   - 1.4
-  - tip
+  - 1.5
 
 before_install:
   - go get github.com/axw/gocov/gocov
@@ -10,4 +10,6 @@ before_install:
 
 script:
   - go test -v ./...
+
+after_success:
   - $HOME/gopath/bin/goveralls -service=travis-ci
