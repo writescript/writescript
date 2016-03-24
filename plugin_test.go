@@ -7,6 +7,8 @@ import (
 	"testing"
 )
 
+// tests
+
 func TestPlugin_ParseSource_Simple(t *testing.T) {
 	plugin := Plugin{}
 	err := plugin.ParseSource(`console.log('hello test')`)
@@ -114,3 +116,5 @@ func Test_LoadPlugin_StringSource(t *testing.T) {
 		t.Error("returned plugin source incorrect", err)
 	}
 }
+
+// benchmarks

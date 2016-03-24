@@ -8,7 +8,7 @@ import (
 )
 
 // Version of the script engine.
-const Version = "0.3.0"
+const Version = "0.3.1"
 
 // WriteScript Core
 type WriteScript struct {
@@ -90,7 +90,7 @@ func (w *WriteScript) Process(plugin, data string, headerOn bool) error {
 	vm.Set("setLevel", func(call otto.FunctionCall) otto.Value {
 		val, err := call.Argument(0).ToInteger()
 		if err == nil {
-			w.Content.SetLevel(int(val))
+			w.Content.SetLevel(uint8(val))
 		}
 		return otto.Value{}
 	})

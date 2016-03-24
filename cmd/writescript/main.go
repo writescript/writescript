@@ -81,7 +81,7 @@ func main() {
 		}
 
 		// read data
-		data := Data{}
+		data := writescript.Data{}
 		data.Init(flagData)
 
 		// run the generator
@@ -101,9 +101,9 @@ func main() {
 
 		// write output
 		if flagOutput == "" {
-			fmt.Println(ws.Content.GetString(flagLinebreak, flagWhitespace))
+			fmt.Println(string(ws.Content.Get(flagLinebreak, flagWhitespace)))
 		} else {
-			fileBytes := []byte(ws.Content.GetString(flagLinebreak, flagWhitespace))
+			fileBytes := ws.Content.Get(flagLinebreak, flagWhitespace)
 			ioutil.WriteFile(flagOutput, fileBytes, 0644)
 		}
 	}

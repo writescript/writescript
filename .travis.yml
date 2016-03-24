@@ -1,15 +1,16 @@
 language: go
 
 go:
-  - 1.4
   - 1.5
 
 before_install:
+  - go get ./...
+  - go get github.com/golang/lint/golint
   - go get github.com/axw/gocov/gocov
   - go get github.com/mattn/goveralls
 
 script:
-  - go test -v ./...
+  - make test
 
 after_success:
   - $HOME/gopath/bin/goveralls -service=travis-ci
