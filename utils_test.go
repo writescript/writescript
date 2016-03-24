@@ -4,6 +4,8 @@ import (
 	"testing"
 )
 
+// tests
+
 func TestUtils_IsValueInList(t *testing.T) {
 	tmp1 := IsValueInList("test", []string{"data", "to"})
 	if tmp1 != false {
@@ -15,3 +17,5 @@ func TestUtils_IsValueInList(t *testing.T) {
 		t.Error("IsValueInList failed")
 	}
 }
+
+// benchmarks

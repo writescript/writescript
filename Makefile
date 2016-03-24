@@ -9,3 +9,6 @@ build:
 test:
 	@golint
 	@go test -bench=. -benchmem -v
+
+install:
+	@cd cmd/writescript && go install

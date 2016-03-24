@@ -81,7 +81,7 @@ func main() {
 		}
 
 		// read data
-		data := Data{}
+		data := writescript.Data{}
 		data.Init(flagData)
 
 		// run the generator

@@ -1,4 +1,4 @@
-package main
+package writescript
 
 import (
 	"fmt"
@@ -16,15 +16,16 @@ type Data struct {
 	JSON string
 }
 
+// Init initialize a new data source
 func (d *Data) Init(src string) {
 	switch d.CheckSource(src) {
-	case SOURCE_UNKNOWN:
+	case SourceUnknown:
 		d.JSON = src
 		break
-	case SOURCE_JSON_FILE:
-		d.ReadJson(src)
+	case SourceFileJSON:
+		d.ReadJSON(src)
 		break
-	case SOURCE_JSON_DATA:
+	case SourceDataJSON:
 		// if source is empty, set the JSON to an empty object
 		if src == "" {
 			d.JSON = "{}"
@@ -32,8 +33,8 @@ func (d *Data) Init(src string) {
 			d.JSON = src
 		}
 		break
-	case SOURCE_YAML_FILE:
-		d.ReadYaml(src)
+	case SourceFileYAML:
+		d.ReadYAML(src)
 		break
 	default:
 		d.JSON = src
@@ -42,39 +43,44 @@ func (d *Data) Init(src string) {
 }
 
 const (
-	SOURCE_UNKNOWN = iota
-	SOURCE_JSON_FILE
-	SOURCE_JSON_DATA
-	SOURCE_YAML_FILE
+	// SourceUnknown enum
+	SourceUnknown = iota
+	// SourceDataJSON enum
+	SourceDataJSON
+	// SourceFileJSON enum
+	SourceFileJSON
+	// SourceFileYAML enum
+	SourceFileYAML
 )
 
-// check if the src is a .json or .yml file or a string with data
+// CheckSource check if the src is a .json or .yml file or a string with data
 func (d *Data) CheckSource(src string) int {
 	// fmt.Println("CheckSource", src)
-	tmpSourceType := SOURCE_UNKNOWN
+	tmpSourceType := SourceUnknown
 
 	srcExt := filepath.Ext(src)
 	switch srcExt {
 	case ".json", ".JSON":
-		tmpSourceType = SOURCE_JSON_FILE
+		tmpSourceType = SourceFileJSON
 		break
 	case ".yml", ".YML", ".yaml", ".YAML":
-		tmpSourceType = SOURCE_YAML_FILE
+		tmpSourceType = SourceFileYAML
 		break
 	default:
 		if src == "" {
-			tmpSourceType = SOURCE_JSON_DATA
+			tmpSourceType = SourceDataJSON
 		} else if string(src[0]) == "{" && string(src[len(src)-1]) == "}" {
 			// check if the source looks like an json object / array
-			tmpSourceType = SOURCE_JSON_DATA
+			tmpSourceType = SourceDataJSON
 		} else if string(src[0]) == "[" && string(src[len(src)-1]) == "]" {
-			tmpSourceType = SOURCE_JSON_DATA
+			tmpSourceType = SourceDataJSON
 		}
 	}
 	return tmpSourceType
 }
 
-func (d *Data) ReadJson(path string) {
+// ReadJSON read a json file
+func (d *Data) ReadJSON(path string) {
 	jsonBytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		fmt.Println("cannot read json file", path)
@@ -84,7 +90,8 @@ func (d *Data) ReadJson(path string) {
 	d.JSON = string(jsonBytes)
 }
 
-func (d *Data) ReadYaml(path string) {
+// ReadYAML read a yaml file
+func (d *Data) ReadYAML(path string) {
 	yamlBytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		fmt.Println("cannot read yaml file", path)
@@ -93,10 +100,10 @@ func (d *Data) ReadYaml(path string) {
 	}
 
 	// format yaml to json
-	tmpJson, errY2J := pkgyaml.ToJSON(yamlBytes, pkgyaml.ToJSONOptions{})
+	tmpJSON, errY2J := pkgyaml.ToJSON(yamlBytes, pkgyaml.ToJSONOptions{})
 	if errY2J != nil {
 		fmt.Println("decode yaml failed", errY2J)
 		os.Exit(21)
 	}
-	d.JSON = string(tmpJson)
+	d.JSON = string(tmpJSON)
 }
