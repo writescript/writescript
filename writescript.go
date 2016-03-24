@@ -121,7 +121,8 @@ func CreateVMScript(plugin, dataJSON string) string {
 	} else {
 		// remove linebreaks (or error at JSON.parse call)
 		dataWithoutLinebreak := strings.Replace(dataJSON, "\n", "", -1)
-		script += `JSON.parse('` + dataWithoutLinebreak + `')`
+		dataWithoutLinebreakEscapeSingleQuote := strings.Replace(dataWithoutLinebreak, `"`, `\"`, -1)
+		script += `JSON.parse("` + dataWithoutLinebreakEscapeSingleQuote + `")`
 	}
 	script += `);`
 	return script
