@@ -76,3 +76,28 @@ func TestData_Init_YAML_File(t *testing.T) {
 }
 
 // benchmarks
+
+var resultDataBench string
+
+func benchmarkData(c string, b *testing.B) {
+	var r string
+	for n := 0; n < b.N; n++ {
+		data := Data{}
+		data.Init(c)
+		r = data.JSON
+	}
+	resultDataBench = r
+}
+
+func Benchmark_Data_empty(b *testing.B) {
+	benchmarkData("", b)
+}
+func Benchmark_Data_string(b *testing.B) {
+	benchmarkData(`{"name":"testdata","description":"some data for testing"}`, b)
+}
+func Benchmark_Data_json(b *testing.B) {
+	benchmarkData("./fixture/testdata.json", b)
+}
+func Benchmark_Data_yaml(b *testing.B) {
+	benchmarkData("./fixture/testdata.yml", b)
+}

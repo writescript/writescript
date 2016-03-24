@@ -98,10 +98,10 @@ func (w *WriteScript) Process(plugin, data string, headerOn bool) error {
 	// run the vm and get the result
 	tmpScripts := strings.Join(tmpPlugin.ImportCodeStack, "\n") + strings.Join(tmpPlugin.Js, "\n")
 	vmScript := CreateVMScript(tmpScripts, data)
-	fmt.Println("vmScript")
-	fmt.Println("====================================")
-	fmt.Println(vmScript)
-	fmt.Println("====================================")
+	// fmt.Println("vmScript")
+	// fmt.Println("====================================")
+	// fmt.Println(vmScript)
+	// fmt.Println("====================================")
 	_, err := vm.Run(vmScript)
 	if err != nil {
 		return err
