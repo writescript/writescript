@@ -10,28 +10,31 @@ import (
 )
 
 const (
-	KEYWORD_IMPORT = "#import "
+	// KeywordImport define the syntax for import
+	KeywordImport = "#import "
 )
 
+// Plugin store url and code for the Plugin
 type Plugin struct {
 	ImportURLs      []string
 	ImportCodeStack []string
 	Js              []string // here we store the main plugin code
 }
 
+// ParseSource parse a source string
 func (p *Plugin) ParseSource(src string) error {
 	pluginLines := strings.Split(src, "\n")
 	for _, v := range pluginLines {
 		// fmt.Println("k", k, "v", v)
 
-		if strings.Contains(v, KEYWORD_IMPORT) {
+		if strings.Contains(v, KeywordImport) {
 			// get the url...
-			tmpUrl := strings.Split(v, KEYWORD_IMPORT)
+			tmpURL := strings.Split(v, KeywordImport)
 
 			// check if import already exists, or is not at the list of known urls
-			if len(p.ImportURLs) == 0 || !IsValueInList(tmpUrl[1], p.ImportURLs) {
-				p.ImportURLs = append(p.ImportURLs, tmpUrl[1])
-				data, err := RequestPlugin(tmpUrl[1])
+			if len(p.ImportURLs) == 0 || !IsValueInList(tmpURL[1], p.ImportURLs) {
+				p.ImportURLs = append(p.ImportURLs, tmpURL[1])
+				data, err := RequestPlugin(tmpURL[1])
 				if err != nil {
 					return err
 				}
@@ -44,6 +47,7 @@ func (p *Plugin) ParseSource(src string) error {
 	return nil
 }
 
+// RequestPlugin load a plugin source over http get
 func RequestPlugin(url string) ([]byte, error) {
 	resp, errReq := http.Get(url)
 	if errReq != nil {
@@ -87,12 +91,17 @@ func LoadPlugin(src string) ([]byte, error) {
 }
 
 const (
+	// PluginTypeUnknown enum
 	PluginTypeUnknown = iota
+	// PluginTypeFile enum
 	PluginTypeFile
+	// PluginTypeURL enum
 	PluginTypeURL
+	// PluginTypeString enum
 	PluginTypeString
 )
 
+// PluginIsType return the PluginType
 func PluginIsType(src string) int {
 	theType := PluginTypeUnknown
 

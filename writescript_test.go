@@ -4,6 +4,8 @@ import (
 	"testing"
 )
 
+// tests
+
 func TestWritescript_Empty(t *testing.T) {
 	var ws = WriteScript{}
 	err := ws.Process("", "", false)
@@ -98,4 +100,32 @@ func TestWritescript_PluginBroken(t *testing.T) {
 	if err == nil {
 		t.Error("failed, no error was detected")
 	}
+}
+
+// benchmarks
+
+var resultBench []byte
+
+func benchmarkWritescript(c string, b *testing.B) {
+	var r []byte
+	for n := 0; n < b.N; n++ {
+		var ws = WriteScript{}
+		err := ws.Process(c, "", false)
+		if err != nil {
+			panic(err)
+		}
+		r = ws.Content.Get("\n", "\t")
+	}
+	resultBench = r
+}
+
+func Benchmark_Writescript_small(b *testing.B) {
+	benchmarkWritescript("write('hello')", b)
+}
+
+func Benchmark_Writescript_large(b *testing.B) {
+	benchmarkWritescript(`write('hello')
+	writeln('-world')
+	writeln('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')
+	writeln('end...')`, b)
 }
