@@ -9,9 +9,18 @@ build:
 	@cd cmd/writescript && go build
 	@./cmd/writescript/writescript --version
 
-test:
+test: test-src test-cli
+
+test-src:
 	@golint
-	@go test -bench=. -benchmem -v
+	@go test -v ./...
+
+bench:
+	@go test -bench=. -benchmem -v ./...
+
+test-cli:
+	@echo "run writescript..."
+	@./cmd/writescript/writescript -p docs/tutorials/1-minute/main.wjs
 
 install:
 	@cd cmd/writescript && go install
@@ -64,3 +73,5 @@ release-netbsd:
 	$(call r,netbsd,386)
 	$(call r,netbsd,arm)
 	@echo "release build netbsd finished!"
+
+.PHONY: build
