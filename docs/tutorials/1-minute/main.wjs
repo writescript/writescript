@@ -1,0 +1,13 @@
+// writescript 1-minute tutorial
+
+writeln('writescript is a simple generator tool scriptable in ecmascript.')
+writeln('the main concept behind writescript is to "programming" code')
+writeln('')
+writeln('the "writeln" function is our most used command to write generator scripts.')
+writeln('protip: check out the docs for more information about the write api')
+writeln('')
+writeln('the goal of this type of code generation is modularity.')
+writeln('writescript can include other plugins by the code preprocess')
+
+// run the following command to write this script
+//  writescript -p main.wjs
