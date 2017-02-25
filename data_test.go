@@ -7,53 +7,34 @@ import (
 // tests
 
 func TestData_CheckSource(t *testing.T) {
-	data := Data{}
-
-	if data.CheckSource("") != SourceDataJSON {
-		t.Error("CheckSource empty failed")
+	var testData = []struct {
+		src string
+		t   int
+	}{
+		{"", SourceDataJSON},
+		{"test.json", SourceFileJSON},
+		{"test.JSON", SourceFileJSON},
+		{`{"some":"data"}`, SourceDataJSON},
+		{`["some","data"]`, SourceDataJSON},
+		{"test.yml", SourceFileYAML},
+		{"test.YML", SourceFileYAML},
+		{"test.yaml", SourceFileYAML},
+		{"test.YAML", SourceFileYAML},
+		{"some: data", SourceUnknown},
 	}
 
-	if data.CheckSource("test.json") != SourceFileJSON {
-		t.Error("CheckSource json failed")
-	}
-
-	if data.CheckSource("test.JSON") != SourceFileJSON {
-		t.Error("CheckSource JSON failed")
-	}
-
-	if data.CheckSource("test.yml") != SourceFileYAML {
-		t.Error("CheckSource yml failed")
-	}
-
-	if data.CheckSource("test.yaml") != SourceFileYAML {
-		t.Error("CheckSource yaml failed")
-	}
-
-	if data.CheckSource("test.YML") != SourceFileYAML {
-		t.Error("CheckSource YML failed")
-	}
-
-	if data.CheckSource("test.YAML") != SourceFileYAML {
-		t.Error("CheckSource YAML failed")
-	}
-
-	if data.CheckSource(`{"some":"data"}`) != SourceDataJSON {
-		t.Error("CheckSource data json object failed")
-	}
-
-	if data.CheckSource(`["some","data"]`) != SourceDataJSON {
-		t.Error("CheckSource data json array failed")
-	}
-
-	if data.CheckSource(`some: data`) != SourceUnknown {
-		t.Error("CheckSource data unknown failed")
+	for i, tt := range testData {
+		data := Data{}
+		if data.CheckSource(tt.src) != tt.t {
+			t.Errorf("CheckSource %q (%v) failed\n", tt.src, i)
+		}
 	}
 }
 
 func TestData_Init_Empty(t *testing.T) {
 	data := Data{}
 	data.Init("")
-	if data.JSON != "{}" {
+	if string(data.JSON) != "{}" {
 		t.Error("Data Init Empty failed")
 	}
 }
@@ -61,7 +42,7 @@ func TestData_Init_Empty(t *testing.T) {
 func TestData_Init_JSON_File(t *testing.T) {
 	data := Data{}
 	data.Init("./fixture/testdata.json")
-	if data.JSON != `{"name":"testdata","description":"some data for testing"}
+	if string(data.JSON) != `{"name":"testdata","description":"some data for testing"}
 ` {
 		t.Error("Data Init JSON File failed")
 	}
@@ -70,17 +51,33 @@ func TestData_Init_JSON_File(t *testing.T) {
 func TestData_Init_YAML_File(t *testing.T) {
 	data := Data{}
 	data.Init("./fixture/testdata.yml")
-	if data.JSON != `{"description":"some data for testing","name":"testdata"}` {
+	if string(data.JSON) != `{"description":"some data for testing","name":"testdata"}` {
 		t.Error("Data Init YAML File failed")
 	}
 }
 
+// func TestData_Init_XML_File(t *testing.T) {
+// 	data := Data{}
+// 	data.Init("./fixture/testdata.xml")
+// 	if string(data.JSON) != `{"description":"some data for testing","name":"testdata"}` {
+// 		t.Error("Data Init XML File failed")
+// 	}
+// }
+
+// func TestData_Init_CSV_File(t *testing.T) {
+// 	data := Data{}
+// 	data.Init("./fixture/testdata.csv")
+// 	if string(data.JSON) != `[[1,2,3],[4,5,6]]` {
+// 		t.Error("Data Init CSV File failed")
+// 	}
+// }
+
 // benchmarks
 
-var resultDataBench string
+var resultDataBench []byte
 
 func benchmarkData(c string, b *testing.B) {
-	var r string
+	var r []byte
 	for n := 0; n < b.N; n++ {
 		data := Data{}
 		data.Init(c)

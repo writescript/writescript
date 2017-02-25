@@ -1,9 +1,7 @@
 package writescript
 
 import (
-	"fmt"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 
 	"go.pedge.io/pkg/yaml"
@@ -13,14 +11,14 @@ import (
 type Data struct {
 	// the writescript.Process need the data formatted as JSON.
 	// this variable the process func can consume.
-	JSON string
+	JSON []byte
 }
 
 // Init initialize a new data source
 func (d *Data) Init(src string) {
 	switch d.CheckSource(src) {
 	case SourceUnknown:
-		d.JSON = src
+		d.JSON = []byte("{}")
 		break
 	case SourceFileJSON:
 		d.ReadJSON(src)
@@ -28,16 +26,16 @@ func (d *Data) Init(src string) {
 	case SourceDataJSON:
 		// if source is empty, set the JSON to an empty object
 		if src == "" {
-			d.JSON = "{}"
+			d.JSON = []byte("{}")
 		} else {
-			d.JSON = src
+			d.JSON = []byte(src)
 		}
 		break
 	case SourceFileYAML:
 		d.ReadYAML(src)
 		break
 	default:
-		d.JSON = src
+		d.JSON = []byte("{}")
 		break
 	}
 }
@@ -54,56 +52,60 @@ const (
 )
 
 // CheckSource check if the src is a .json or .yml file or a string with data
-func (d *Data) CheckSource(src string) int {
-	// fmt.Println("CheckSource", src)
-	tmpSourceType := SourceUnknown
+func (d *Data) CheckSource(src string) (r int) {
+	r = SourceUnknown
 
 	srcExt := filepath.Ext(src)
 	switch srcExt {
 	case ".json", ".JSON":
-		tmpSourceType = SourceFileJSON
+		r = SourceFileJSON
 		break
 	case ".yml", ".YML", ".yaml", ".YAML":
-		tmpSourceType = SourceFileYAML
+		r = SourceFileYAML
 		break
 	default:
 		if src == "" {
-			tmpSourceType = SourceDataJSON
+			r = SourceDataJSON
 		} else if string(src[0]) == "{" && string(src[len(src)-1]) == "}" {
 			// check if the source looks like an json object / array
-			tmpSourceType = SourceDataJSON
+			r = SourceDataJSON
 		} else if string(src[0]) == "[" && string(src[len(src)-1]) == "]" {
-			tmpSourceType = SourceDataJSON
+			r = SourceDataJSON
 		}
 	}
-	return tmpSourceType
+	return r
 }
 
 // ReadJSON read a json file
-func (d *Data) ReadJSON(path string) {
+func (d *Data) ReadJSON(path string) error {
 	jsonBytes, err := ioutil.ReadFile(path)
 	if err != nil {
-		fmt.Println("cannot read json file", path)
-		fmt.Println(err)
-		os.Exit(1)
+		// fmt.Println("cannot read json file", path)
+		// fmt.Println(err)
+		// os.Exit(1)
+		return err
 	}
-	d.JSON = string(jsonBytes)
+	d.JSON = jsonBytes
+	return nil
 }
 
 // ReadYAML read a yaml file
-func (d *Data) ReadYAML(path string) {
+func (d *Data) ReadYAML(path string) error {
 	yamlBytes, err := ioutil.ReadFile(path)
 	if err != nil {
-		fmt.Println("cannot read yaml file", path)
-		fmt.Println(err)
-		os.Exit(20)
+		// fmt.Println("cannot read yaml file", path)
+		// fmt.Println(err)
+		// os.Exit(20)
+		return err
 	}
 
 	// format yaml to json
 	tmpJSON, errY2J := pkgyaml.ToJSON(yamlBytes, pkgyaml.ToJSONOptions{})
 	if errY2J != nil {
-		fmt.Println("decode yaml failed", errY2J)
-		os.Exit(21)
+		// fmt.Println("decode yaml failed", errY2J)
+		// os.Exit(21)
+		return errY2J
 	}
-	d.JSON = string(tmpJSON)
+	d.JSON = tmpJSON
+	return nil
 }
