@@ -1,1 +1,5 @@
 /cmd/writescript/writescript
+
+*.zip
+*.exe
+cmd/writescript/build
