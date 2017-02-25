@@ -62,7 +62,7 @@ func main() {
 	//
 	// process
 	//
-	app.Action = func(c *cli.Context) {
+	app.Action = func(c *cli.Context) error {
 		//
 		// cli flags
 		//
@@ -106,6 +106,7 @@ func main() {
 			fileBytes := ws.Content.Get(flagLinebreak, flagWhitespace)
 			ioutil.WriteFile(flagOutput, fileBytes, 0644)
 		}
+		return nil
 	}
 
 	app.Run(os.Args)
