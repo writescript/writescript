@@ -57,27 +57,21 @@ console.log('hello test')`)
 	}
 }
 
-func Test_PluginIsType_Unknown(t *testing.T) {
-	if PluginIsType("") != PluginTypeUnknown {
-		t.Error("Source type is not unknown")
+func Test_PluginIsType(t *testing.T) {
+	var testData = []struct {
+		src string
+		typ int
+	}{
+		{"", PluginTypeUnknown},
+		{"test.js", PluginTypeFile},
+		{"http://test.js", PluginTypeURL},
+		{"test string", PluginTypeString},
 	}
-}
 
-func Test_PluginIsType_File(t *testing.T) {
-	if PluginIsType("test.js") != PluginTypeFile {
-		t.Error("Source type is not javascript")
-	}
-}
-
-func Test_PluginIsType_Url(t *testing.T) {
-	if PluginIsType("http://test.js") != PluginTypeURL {
-		t.Error("Source type is not an url")
-	}
-}
-
-func Test_PluginIsType_String(t *testing.T) {
-	if PluginIsType("test string") != PluginTypeString {
-		t.Error("Source type is not a string")
+	for i, tt := range testData {
+		if PluginIsType(tt.src) != tt.typ {
+			t.Errorf("Source (%v) type is not correct type\n", i)
+		}
 	}
 }
 
