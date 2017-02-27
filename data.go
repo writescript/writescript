@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"go.pedge.io/pkg/yaml"
+	"github.com/paulvollmer/go-verbose"
 )
 
 // Data initialize the data source for the writescript process.
@@ -15,25 +16,35 @@ type Data struct {
 }
 
 // Init initialize a new data source
-func (d *Data) Init(src string) {
+func (d *Data) Init(src string, debug verbose.Verbose) {
+	debug.Println("==> check type")
 	switch d.CheckSource(src) {
 	case SourceUnknown:
+		debug.Println("--> unknown type")
 		d.JSON = []byte("{}")
 		break
+
 	case SourceFileJSON:
+		debug.Println("--> type json")
 		d.ReadJSON(src)
 		break
+
 	case SourceDataJSON:
 		// if source is empty, set the JSON to an empty object
 		if src == "" {
+			debug.Println("--> empty data")
 			d.JSON = []byte("{}")
 		} else {
+			debug.Println("--> set source")
 			d.JSON = []byte(src)
 		}
 		break
+
 	case SourceFileYAML:
+		debug.Println("--> type yaml")
 		d.ReadYAML(src)
 		break
+
 	default:
 		d.JSON = []byte("{}")
 		break
