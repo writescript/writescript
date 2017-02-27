@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"github.com/paulvollmer/go-verbose"
 	"strings"
 )
 
@@ -89,11 +90,12 @@ func RequestPlugin(url string) ([]byte, error) {
 }
 
 // LoadPlugin and return the source as a byte array
-func LoadPlugin(src string) ([]byte, error) {
+func LoadPlugin(src string, debug verbose.Verbose) ([]byte, error) {
 	var err error
 	var dataReturn []byte
 
 	srcType := PluginIsType(src)
+	debug.Println("--> type", srcType)
 	switch srcType {
 
 	case PluginTypeUnknown:
@@ -108,6 +110,7 @@ func LoadPlugin(src string) ([]byte, error) {
 			fmt.Println(red("Error", err))
 			os.Exit(127)
 		}
+		debug.Println("rile read", string(dataReturn))
 		break
 
 	case PluginTypeURL:
