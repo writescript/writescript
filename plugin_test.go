@@ -1,11 +1,15 @@
 package writescript
 
 import (
+	"github.com/paulvollmer/go-verbose"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 )
+
+var debugPlugin = verbose.New(os.Stdout, false)
 
 // tests
 
@@ -79,14 +83,14 @@ func Test_PluginIsType(t *testing.T) {
 // test LoadPlugin function
 //
 func Test_LoadPlugin_Empty(t *testing.T) {
-	result1, err := LoadPlugin("")
+	result1, err := LoadPlugin("", *debugPlugin)
 	if string(result1) != "" && err == nil {
 		t.Error("returned plugin is not empty message", err)
 	}
 }
 
 func Test_LoadPlugin_File(t *testing.T) {
-	result2, err := LoadPlugin("./fixture/testplugin.js")
+	result2, err := LoadPlugin("./fixture/testplugin.js", *debugPlugin)
 	if string(result2) != "console.log('hello world')\n" {
 		t.Error("returned plugin is incorrect", err)
 	}
@@ -98,14 +102,14 @@ func Test_LoadPlugin_Url(t *testing.T) {
 		io.WriteString(w, "ok...")
 	}))
 	defer server.Close()
-	result3, err := LoadPlugin(server.URL)
+	result3, err := LoadPlugin(server.URL, *debugPlugin)
 	if string(result3) != "ok..." {
 		t.Error("returned plugin is incorrect", err)
 	}
 }
 
 func Test_LoadPlugin_StringSource(t *testing.T) {
-	result, err := LoadPlugin("var foo = 1337;")
+	result, err := LoadPlugin("var foo = 1337;", *debugPlugin)
 	if string(result) != "var foo = 1337;" {
 		t.Error("returned plugin source incorrect", err)
 	}

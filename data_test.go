@@ -1,8 +1,12 @@
 package writescript
 
 import (
+	"github.com/paulvollmer/go-verbose"
+	"os"
 	"testing"
 )
+
+var debug = verbose.New(os.Stdout, false)
 
 // tests
 
@@ -33,7 +37,7 @@ func TestData_CheckSource(t *testing.T) {
 
 func TestData_Init_Empty(t *testing.T) {
 	data := Data{}
-	data.Init("")
+	data.Init("", *debug)
 	if string(data.JSON) != "{}" {
 		t.Error("Data Init Empty failed")
 	}
@@ -41,7 +45,7 @@ func TestData_Init_Empty(t *testing.T) {
 
 func TestData_Init_JSON_File(t *testing.T) {
 	data := Data{}
-	data.Init("./fixture/testdata.json")
+	data.Init("./fixture/testdata.json", *debug)
 	if string(data.JSON) != `{"name":"testdata","description":"some data for testing"}
 ` {
 		t.Error("Data Init JSON File failed")
@@ -50,7 +54,7 @@ func TestData_Init_JSON_File(t *testing.T) {
 
 func TestData_Init_YAML_File(t *testing.T) {
 	data := Data{}
-	data.Init("./fixture/testdata.yml")
+	data.Init("./fixture/testdata.yml", *debug)
 	if string(data.JSON) != `{"description":"some data for testing","name":"testdata"}` {
 		t.Error("Data Init YAML File failed")
 	}
@@ -80,7 +84,7 @@ func benchmarkData(c string, b *testing.B) {
 	var r []byte
 	for n := 0; n < b.N; n++ {
 		data := Data{}
-		data.Init(c)
+		data.Init(c, *debug)
 		r = data.JSON
 	}
 	resultDataBench = r

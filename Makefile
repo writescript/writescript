@@ -20,7 +20,7 @@ bench:
 
 test-cli:
 	@echo "run writescript..."
-	@./cmd/writescript/writescript -p docs/tutorials/1-minute/main.wjs
+	@./cmd/writescript/writescript -p docs/tutorials/1-minute/main.js
 
 fmt:
 	go fmt ./...

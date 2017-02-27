@@ -6,6 +6,8 @@ import (
 	"github.com/paulvollmer/go-verbose"
 	"github.com/robertkrimen/otto"
 	"github.com/writescript/textbackend"
+	"os"
+	"strconv"
 	"strings"
 )
 
@@ -111,6 +113,42 @@ func (w *WriteScript) Process(plugin, data string, headerOn bool, debug verbose.
 		return otto.Value{}
 	})
 
+	// error funcs
+	vm.Set("error", func(call otto.FunctionCall) otto.Value {
+		if len(call.ArgumentList) == 0 {
+			fmt.Println(red("Error"))
+		} else {
+			fmt.Println(red("Error " + string(call.ArgumentList[0].String())))
+		}
+		os.Exit(127)
+		return otto.Value{}
+	})
+
+	vm.Set("exit", func(call otto.FunctionCall) otto.Value {
+		if len(call.ArgumentList) == 0 {
+			fmt.Println(red("Error, missing exit code"))
+			os.Exit(127)
+		} else {
+			d, err := strconv.Atoi(call.ArgumentList[0].String())
+			if err != nil {
+				fmt.Println(red("Error, invalid type for exit code. not an integer."))
+			}
+			os.Exit(d)
+		}
+		return otto.Value{}
+	})
+
+	vm.Set("println", func(call otto.FunctionCall) otto.Value {
+		if len(call.ArgumentList) == 0 {
+			os.Exit(0)
+		} else {
+			val := call.Argument(0).String()
+			fmt.Println(blue("console>"), cyan(val))
+		}
+
+		return otto.Value{}
+	})
+
 	// run the vm and get the result
 	tmpScripts := strings.Join(tmpPlugin.ImportCodeStack, "\n") + strings.Join(tmpPlugin.Js, "\n")
 	vmScript := CreateVMScript(tmpScripts, data)
@@ -128,7 +166,49 @@ func (w *WriteScript) Process(plugin, data string, headerOn bool, debug verbose.
 // CreateVMScript creates the javascript script we run at the otto vm.
 // data must be formatted as json.
 func CreateVMScript(plugin, dataJSON string) string {
-	script := `function RUN(data) {
+	coreScript := `
+	var writescript = {
+		version: '0.3.2',
+		languages: {
+			unknown: '',
+		  javascript: '.js',
+			golang: '.go',
+			python: '.py',
+			ruby: '.rb'
+		},
+		currentLanguage: 'unknown'
+	};
+
+	function writeVar(name, val) {
+			writeln(VAR(name, val))
+	};
+
+	function writeObject(name, val) {
+		writeln('type '+name+' struct {')
+			for(i in val) {
+				writeln(VAR(i, val[i]))
+			}
+
+		writeln('}')
+	};
+
+	function VAR(name, val) {
+		switch(writescript.currentLanguage) {
+		case 'unknown':
+			return '';
+			break;
+		case 'javascript':
+			return 'var '+name+' = '+val+';';
+		case 'golang':
+			return 'var '+name+' = '+val;
+		}
+		return 'var'
+	}`
+
+	// coreScript = ``
+
+	script := coreScript + `
+	function RUN(data) {
 		` + plugin + `
 	};`
 	script += `RUN(`

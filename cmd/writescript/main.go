@@ -3,11 +3,17 @@ package main
 import (
 	"fmt"
 	"github.com/codegangsta/cli"
-	"github.com/writescript/writescript"
-	"os"
 	"github.com/paulvollmer/go-verbose"
+	"github.com/writescript/writescript"
 	"io/ioutil"
+	"os"
 )
+
+// .............................................................................
+// . write .....................................................................
+// ... script ..................................................................
+// ..... v0.3.1 ................................................................
+// .............................................................................
 
 var (
 	debug verbose.Verbose
@@ -87,7 +93,6 @@ func main() {
 		debug = *verbose.New(os.Stdout, flagVerbose)
 		debug.Println("==> debug active")
 
-
 		// read plugin
 		debug.Println("==> load plugins")
 		pluginBytes, err := writescript.LoadPlugin(flagPlugin, debug)
@@ -100,6 +105,7 @@ func main() {
 		debug.Println("==> load data")
 		data := writescript.Data{}
 		data.Init(flagData, debug)
+		// fmt.Println(data)
 
 		// run the generator
 		debug.Println("==> execute script")
