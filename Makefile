@@ -2,7 +2,7 @@
 
 VERSION=0.3.2
 
-all: test release
+all: build test
 
 build:
 	@echo "build v${VERSION}"
