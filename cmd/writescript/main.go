@@ -19,7 +19,7 @@ func main() {
 	app.Version = writescript.Version
 	app.Usage = "plugin based generator tool backpacked with data"
 	app.Author = "Paul Vollmer"
-	app.Email = "paul.vollmer@fh-potsdam.de"
+	app.Email = "github.com/writescript"
 
 	//
 	// flags

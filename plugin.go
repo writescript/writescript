@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -34,11 +36,36 @@ func (p *Plugin) ParseSource(src string) error {
 			// check if import already exists, or is not at the list of known urls
 			if len(p.ImportURLs) == 0 || !IsValueInList(tmpURL[1], p.ImportURLs) {
 				p.ImportURLs = append(p.ImportURLs, tmpURL[1])
-				data, err := RequestPlugin(tmpURL[1])
+
+				// file
+				u, err := url.Parse(tmpURL[1])
+
 				if err != nil {
-					return err
+					fmt.Println("Error", err)
+					os.Exit(128)
 				}
-				p.ImportCodeStack = append(p.ImportCodeStack, string(data))
+				if u.Scheme == "" {
+					// read file
+					dat, err := ioutil.ReadFile(tmpURL[1])
+					if err != nil {
+						fmt.Println(red("Error read file ", tmpURL[1]))
+						fmt.Println(red(err))
+						os.Exit(127)
+					}
+					// TODO: recursive
+					p.ImportCodeStack = append(p.ImportCodeStack, string(dat))
+					// fmt.Println("DATA:", string(dat))
+				} else if u.Scheme == "http" || u.Scheme == "https" {
+					// http request
+					data, err := RequestPlugin(tmpURL[1])
+					if err != nil {
+						fmt.Println("Error", err)
+						return err
+					}
+					p.ImportCodeStack = append(p.ImportCodeStack, string(data))
+				}
+
+
 			}
 		} else {
 			p.Js = append(p.Js, v)
@@ -66,19 +93,29 @@ func LoadPlugin(src string) ([]byte, error) {
 	var err error
 	var dataReturn []byte
 
-	switch PluginIsType(src) {
+	srcType := PluginIsType(src)
+	switch srcType {
 
 	case PluginTypeUnknown:
 		dataReturn = []byte("")
 		err = errors.New("No Plugin was set")
+		fmt.Println(red("Error", err))
 		break
 
 	case PluginTypeFile:
 		dataReturn, err = ioutil.ReadFile(src)
+		if err != nil {
+			fmt.Println(red("Error", err))
+			os.Exit(127)
+		}
 		break
 
 	case PluginTypeURL:
 		dataReturn, err = RequestPlugin(src)
+		if err != nil {
+			fmt.Println(red("Error", err))
+			os.Exit(127)
+		}
 		break
 
 	case PluginTypeString:
@@ -105,7 +142,7 @@ const (
 func PluginIsType(src string) int {
 	theType := PluginTypeUnknown
 
-	tmpExt := filepath.Ext(src)
+	tmpExt := strings.ToLower(filepath.Ext(src))
 	tmpURL, urlErr := url.Parse(src)
 
 	if urlErr == nil && tmpURL.Scheme == "http" || tmpURL.Scheme == "https" {
@@ -114,6 +151,8 @@ func PluginIsType(src string) int {
 		theType = PluginTypeFile
 	} else if src != "" {
 		theType = PluginTypeString
+	} else {
+		fmt.Println(red("Error, unknown plugin type"))
 	}
 
 	return theType
