@@ -4,8 +4,8 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	"go.pedge.io/pkg/yaml"
 	"github.com/paulvollmer/go-verbose"
+	"go.pedge.io/pkg/yaml"
 )
 
 // Data initialize the data source for the writescript process.

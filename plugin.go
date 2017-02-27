@@ -2,13 +2,13 @@ package writescript
 
 import (
 	"errors"
+	"fmt"
+	"github.com/paulvollmer/go-verbose"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"fmt"
 	"os"
 	"path/filepath"
-	"github.com/paulvollmer/go-verbose"
 	"strings"
 )
 
@@ -65,7 +65,6 @@ func (p *Plugin) ParseSource(src string) error {
 					}
 					p.ImportCodeStack = append(p.ImportCodeStack, string(data))
 				}
-
 
 			}
 		} else {

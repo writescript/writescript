@@ -2,23 +2,23 @@ package writescript
 
 import (
 	"fmt"
+	"github.com/fatih/color"
+	"github.com/paulvollmer/go-verbose"
 	"github.com/robertkrimen/otto"
 	"github.com/writescript/textbackend"
-	"github.com/paulvollmer/go-verbose"
-	"strings"
-	"github.com/fatih/color"
 	"os"
+	"strings"
 )
 
 // Version of the script engine.
 const Version = "0.3.2"
 
 var (
-	red = color.New(color.FgRed).SprintFunc()
-	green = color.New(color.FgGreen).SprintFunc()
-	blue = color.New(color.FgBlue).SprintFunc()
+	red    = color.New(color.FgRed).SprintFunc()
+	green  = color.New(color.FgGreen).SprintFunc()
+	blue   = color.New(color.FgBlue).SprintFunc()
 	yellow = color.New(color.FgYellow).SprintFunc()
-	cyan = color.New(color.FgCyan).SprintFunc()
+	cyan   = color.New(color.FgCyan).SprintFunc()
 )
 
 // WriteScript Core
@@ -62,7 +62,7 @@ func (w *WriteScript) Process(plugin, data string, headerOn bool, debug verbose.
 			for _, v := range call.ArgumentList {
 				val, errVal := v.ToString()
 				if errVal != nil {
-					fmt.Println(red("Error: cannot convert variable "+ errVal.Error()))
+					fmt.Println(red("Error: cannot convert variable " + errVal.Error()))
 				}
 				tmpLine += val
 			}
@@ -77,7 +77,7 @@ func (w *WriteScript) Process(plugin, data string, headerOn bool, debug verbose.
 			for _, v := range call.ArgumentList {
 				val, errVal := v.ToString()
 				if errVal != nil {
-					fmt.Println(red("Error: cannot convert variable "+ errVal.Error()))
+					fmt.Println(red("Error: cannot convert variable " + errVal.Error()))
 				}
 				tmpLine += val
 			}
@@ -106,7 +106,11 @@ func (w *WriteScript) Process(plugin, data string, headerOn bool, debug verbose.
 		val, err := call.Argument(0).ToInteger()
 		if err == nil {
 			w.Content.SetLevel(uint8(val))
+		} else {
+			fmt.Println(red("Error", err))
 		}
+		}
+
 		return otto.Value{}
 	})
 

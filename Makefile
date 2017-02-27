@@ -1,6 +1,6 @@
 # writescript Makefile
 
-VERSION=0.3.1
+VERSION=0.3.2
 
 all: test release
 
@@ -21,6 +21,9 @@ bench:
 test-cli:
 	@echo "run writescript..."
 	@./cmd/writescript/writescript -p docs/tutorials/1-minute/main.wjs
+
+fmt:
+	go fmt ./...
 
 install:
 	@cd cmd/writescript && go install
